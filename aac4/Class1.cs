@@ -13,7 +13,7 @@ namespace TA4
 {
 
     using Grammar = Dictionary<string, List<string>>;
-        
+
     public class BrokenFileException : Exception
     {
         public BrokenFileException() : base("The file is broken!") { }
@@ -151,13 +151,12 @@ namespace TA4
                         "${nonterminal}");
         }
 
-        public Dictionary<string, List<string>> ConstructFIRST(Dictionary<string, List<string>> grammar,
-            List<string> grammarRules, string currentNonterminal, Dictionary<string, List<string>> oldFIRST)
+        public Grammar ConstructFIRST(Grammar grammar, List<string> grammarRules, string currentNonterminal, Grammar oldFIRST)
         {
-            Dictionary<string, List<string>> newFIRST = new(oldFIRST);
+            Grammar newFIRST = new(oldFIRST);
 
-            List<string> terminals = new List<string>();
-            StringBuilder currentSentence = new StringBuilder();
+            List<string> terminals = new();
+            StringBuilder currentSentence = new();
             bool isItFirstTime = true;
             bool doAllPreviousFIRSTsHaveEmptySymbol = false;
             foreach (var grammarRule in grammarRules)
@@ -243,8 +242,7 @@ namespace TA4
             return newFIRST;
         }
 
-        public Dictionary<string, List<string>> ConstructFOLLOW(Dictionary<string, List<string>> FIRST, string startNonterminal,
-            Dictionary<string, List<string>> grammar)
+        public Grammar ConstructFOLLOW(Grammar FIRST, string startNonterminal, Grammar grammar)
         {
             Dictionary<string, List<string>> newFOLLOW = new();
             if (newFOLLOW.Count != grammar.Count)
@@ -351,19 +349,18 @@ namespace TA4
             return newFOLLOW;
         }
 
-        public DataTable GeneratePredictiveAnalysisTable(Dictionary<string, List<string>> grammar,
-            Dictionary<string, List<string>> FIRST, Dictionary<string, List<string>> FOLLOW)
+        public DataTable GeneratePredictiveAnalysisTable(Grammar grammar, Grammar FIRST, Grammar FOLLOW)
         {
-            DataTable predictiveAnalysisTable = new DataTable();
-            List<string> headerRow = new List<string>
+            DataTable predictiveAnalysisTable = new();
+            List<string> headerRow = new()
             {
                 "Nonterminals"
             };
 
             // Generates an empty table with terminals in the header row and nonterminals in the header column.
-            List<string> headerColumn = new List<string>();
+            List<string> headerColumn = new();
             {
-                StringBuilder buffer = new StringBuilder();
+                StringBuilder buffer = new();
                 foreach (var grammarRules in grammar)
                 {
                     headerColumn.Add(grammarRules.Key);
@@ -394,7 +391,7 @@ namespace TA4
             predictiveAnalysisTable.Columns.AddRange(headerRow.Select(r => new DataColumn(r)).ToArray());
             foreach (var nonterminal in headerColumn)
             {
-                List<string> yetAnotherHeaderRow = new List<string>
+                List<string> yetAnotherHeaderRow = new()
                 {
                     nonterminal
                 };
@@ -421,8 +418,8 @@ namespace TA4
             {
                 foreach (var grammarRule in grammarRules.Value)
                 {
-                    Dictionary<string, List<string>> constructedFIRSTforProduction = new Grammar();
-                    List<string> listForCurrentGrammarRule = new List<string>
+                    Grammar constructedFIRSTforProduction = new();
+                    List<string> listForCurrentGrammarRule = new()
                     {
                         grammarRule
                     };
@@ -463,7 +460,7 @@ namespace TA4
 
             text = text.Replace("\r\n", " ") + "$";
             string initialText = text;
-            Stack<string> stack = new Stack<string>();
+            Stack<string> stack = new();
             stack.Push("$");
             stack.Push(startNonterminal);
             yetAnotherRow[0] = "$" + startNonterminal;
