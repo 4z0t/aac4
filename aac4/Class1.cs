@@ -335,7 +335,7 @@ namespace TA4
                         if (match.Success)
                         {
                             string B = match.Groups[1].Value;
-                            List<string> rangeToAdd = new List<string>((newFOLLOW[grammarRules.Key]).Except(newFOLLOW[B]));
+                            List<string> rangeToAdd = new((newFOLLOW[grammarRules.Key]).Except(newFOLLOW[B]));
                             if (rangeToAdd.Count != 0)
                             {
                                 newFOLLOW[B].AddRange(rangeToAdd);
