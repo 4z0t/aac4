@@ -19,12 +19,12 @@ namespace TA4
             grammar = new Dictionary<string, List<string>>();
 
             string nonterminal = string.Empty;
-            string replacementsForNonterminal = string.Empty;
             List<string> listOfReplacementsForNonterminal = new List<string>();
             StringBuilder subline = new StringBuilder();
             foreach (var line in rules)
             {
-                if (Regex.Match(line, @"[<]{1}.*?[>]{1}[:]{1}[\s]{1}.*").Success)
+                string replacementsForNonterminal;
+                if (Regex.Match(line, @"<.*?>:\s.*").Success)
                 {
                     if (!nonterminal.Equals(string.Empty))
                     {
@@ -131,17 +131,17 @@ namespace TA4
             subline.Clear();
             grammar.Add(nonterminal, new List<string>(listOfReplacementsForNonterminal));
             //grammar.Add("<__>", new List<string> { "$"});
-            foreach (var (k, v) in grammar)
-            {
-                Console.WriteLine("'" + k + "'");
-                foreach (var s in v)
-                {
-                    Console.WriteLine(s);
-                }
-            }
+            //foreach (var (k, v) in grammar)
+            //{
+            //    Console.WriteLine("'" + k + "'");
+            //    foreach (var s in v)
+            //    {
+            //        Console.WriteLine(s);
+            //    }
+            //}
             listOfReplacementsForNonterminal.Clear();
 
-            return Regex.Replace(rules[0], @"(?<nonterminal>[<]{1}.*?[>]{1})[:]{1}[\s]{1}.*",
+            return Regex.Replace(rules[0], @"(?<nonterminal><.*?>):\s.*",
                         "${nonterminal}");
         }
 
@@ -271,7 +271,7 @@ namespace TA4
                             }
 
                             string B = match.Groups[1].Value;
- 
+
                             string beta = grammarRuleForeach.Remove(0, grammarRuleForeach.IndexOf(B) + B.Length);
                             if (FIRST.ContainsKey(beta))
                             {
@@ -297,8 +297,11 @@ namespace TA4
                             else
                             {
                                 Dictionary<string, List<string>> temporaryFIRST = new Dictionary<string, List<string>>();
-                                List<string> betaList = new List<string>();
-                                betaList.Add(beta);
+                                List<string> betaList = new List<string>
+                                {
+                                    beta
+                                };
+
                                 bool doesTemporaryFirstContainEpsilon = false;
 
                                 temporaryFIRST = ConstructFIRST(grammar, betaList, "beta", temporaryFIRST);
@@ -346,8 +349,10 @@ namespace TA4
             Dictionary<string, List<string>> FIRST, Dictionary<string, List<string>> FOLLOW)
         {
             DataTable predictiveAnalysisTable = new DataTable();
-            List<string> headerRow = new List<string>();
-            headerRow.Add("Nonterminals");
+            List<string> headerRow = new List<string>
+            {
+                "Nonterminals"
+            };
 
             // Generates an empty table with terminals in the header row and nonterminals in the header column.
             List<string> headerColumn = new List<string>();
@@ -383,8 +388,10 @@ namespace TA4
             predictiveAnalysisTable.Columns.AddRange(headerRow.Select(r => new DataColumn(r)).ToArray());
             foreach (var nonterminal in headerColumn)
             {
-                List<string> yetAnotherHeaderRow = new List<string>();
-                yetAnotherHeaderRow.Add(nonterminal);
+                List<string> yetAnotherHeaderRow = new List<string>
+                {
+                    nonterminal
+                };
                 for (int i = 1; i < headerRow.Count; i++)
                     yetAnotherHeaderRow.Add("");
                 predictiveAnalysisTable.Rows.Add(yetAnotherHeaderRow.ToArray());
@@ -409,8 +416,10 @@ namespace TA4
                 foreach (var grammarRule in grammarRules.Value)
                 {
                     Dictionary<string, List<string>> constructedFIRSTforProduction = new Dictionary<string, List<string>>();
-                    List<string> listForCurrentGrammarRule = new List<string>();
-                    listForCurrentGrammarRule.Add(grammarRule);
+                    List<string> listForCurrentGrammarRule = new List<string>
+                    {
+                        grammarRule
+                    };
                     constructedFIRSTforProduction = this.ConstructFIRST(grammar, listForCurrentGrammarRule,
                         "test", constructedFIRSTforProduction);
                     foreach (var terminal in constructedFIRSTforProduction["test"])
@@ -440,11 +449,9 @@ namespace TA4
             int indexOfCharacterInInitialText = 0;
 
             DataTable analysisResultsTable = new DataTable();
-            string[] yetAnotherRow = new string[3];
+            string[] yetAnotherRow = new string[3] { "Stack", "Input", "Remark" };
             ArrayList changedStack = new ArrayList();
-            yetAnotherRow[0] = "Stack";
-            yetAnotherRow[1] = "Input";
-            yetAnotherRow[2] = "Remark";
+
             analysisResultsTable.Columns.AddRange(yetAnotherRow.Select(r => new DataColumn(r)).ToArray());
             Array.Clear(yetAnotherRow, 0, yetAnotherRow.Length);
 
