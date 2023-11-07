@@ -24,7 +24,6 @@ namespace TA4
             StringBuilder subline = new StringBuilder();
             foreach (var line in rules)
             {
-                Console.WriteLine(line);
                 if (Regex.Match(line, @"[<]{1}.*?[>]{1}[:]{1}[\s]{1}.*").Success)
                 {
                     if (!nonterminal.Equals(string.Empty))
@@ -127,10 +126,17 @@ namespace TA4
                     listOfReplacementsForNonterminal.Add("$");
                 }
             }
-
             listOfReplacementsForNonterminal.Add(subline.ToString());
             subline.Clear();
             grammar.Add(nonterminal, new List<string>(listOfReplacementsForNonterminal));
+            foreach (var (k,v) in grammar)
+            {
+                Console.WriteLine("'" + k + "'");
+                foreach (var s in v)
+                {
+                    Console.WriteLine(s);
+                }
+            }
             listOfReplacementsForNonterminal.Clear();
 
             return Regex.Replace(rules[0], @"(?<nonterminal>[<]{1}.*?[>]{1})[:]{1}[\s]{1}.*",
@@ -647,13 +653,7 @@ namespace TA4
                         if (text.Equals("$"))
                         {
                             analysisResultsTable.Rows.Add(yetAnotherRow);
-                            DataView analysisResultsTableDataView = new DataView(analysisResultsTable);
-                            analysisResultsTableDataView.AllowEdit = false;
-                            analysisResultsTableDataView.AllowDelete = false;
-                            analysisResultsTableDataView.AllowNew = false;
-                            //PredictiveAnalysisTable analysisResultsTableWindow =
-                            //    new PredictiveAnalysisTable(analysisResultsTableDataView, "Result Table");
-                            //analysisResultsTableWindow.Show();
+                            PrintTableOrView(analysisResultsTable, "Result Table");
                             break;
                         }
                         else
@@ -661,17 +661,9 @@ namespace TA4
                             yetAnotherRow[2] = "Error, skip <<" + text + ">>";
 
                             analysisResultsTable.Rows.Add(yetAnotherRow);
-                            DataView analysisResultsTableDataView = new DataView(analysisResultsTable);
-                            analysisResultsTableDataView.AllowEdit = false;
-                            analysisResultsTableDataView.AllowDelete = false;
-                            analysisResultsTableDataView.AllowNew = false;
-                            //PredictiveAnalysisTable analysisResultsTableWindow =
-                            //    new PredictiveAnalysisTable(analysisResultsTableDataView, "Result Table");
-                            //analysisResultsTableWindow.Show();
-
+                            PrintTableOrView(analysisResultsTable, "Result Table");
                             errorMessages.Add(new KeyValuePair<int, string>(indexOfCharacterInInitialText, "Unexpected end of the text"));
                             break;
-                            //throw new ArgumentException("Error in the text (4)");
                         }
                     }
                 }
@@ -711,15 +703,6 @@ namespace TA4
                         }
                     }
                     errorTable.Rows.Add("---", "Total:", orderedErrorList.Count.ToString());
-
-                    DataView errorTableDataView = new DataView(errorTable);
-                    errorTableDataView.AllowEdit = false;
-                    errorTableDataView.AllowDelete = false;
-                    errorTableDataView.AllowNew = false;
-
-                    //PredictiveAnalysisTable errorTableWindow =
-                    //            new PredictiveAnalysisTable(errorTableDataView, "Table Of Errors");
-                    //errorTableWindow.Show();
                     PrintTableOrView(errorTable, "Table Of Errors");
                 }
             }
