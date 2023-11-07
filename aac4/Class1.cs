@@ -449,12 +449,12 @@ namespace TA4
         public void TextCorrectnessVerification(DataTable predictiveAnalysisTable, Dictionary<string, List<string>> FIRST,
             Dictionary<string, List<string>> FOLLOW, string startNonterminal, string text, int[] quantityOfSymbolsInEachLine)
         {
-            List<KeyValuePair<int, string>> errorMessages = new List<KeyValuePair<int, string>>();
+            List<KeyValuePair<int, string>> errorMessages = new();
             int indexOfCharacterInInitialText = 0;
 
-            DataTable analysisResultsTable = new DataTable();
+            DataTable analysisResultsTable = new();
             string[] yetAnotherRow = new string[3] { "Stack", "Input", "Remark" };
-            ArrayList changedStack = new ArrayList();
+            ArrayList changedStack = new();
 
             analysisResultsTable.Columns.AddRange(yetAnotherRow.Select(r => new DataColumn(r)).ToArray());
             Array.Clear(yetAnotherRow, 0, yetAnotherRow.Length);
@@ -468,11 +468,11 @@ namespace TA4
             yetAnotherRow[1] = text;
             yetAnotherRow[2] = "start";
             changedStack.Add("$");
-            List<string> terminalsFromTable = new List<string>();
+            List<string> terminalsFromTable = new();
             foreach (DataColumn terminal in predictiveAnalysisTable.Columns)
                 if (!terminal.ColumnName.Equals("Nonterminals"))
                     terminalsFromTable.Add(terminal.ColumnName);
-            List<string> nonterminalsFromTable = new List<string>();
+            List<string> nonterminalsFromTable = new();
             for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
                 nonterminalsFromTable.Add((string)predictiveAnalysisTable.Rows[i][0]);
 
@@ -496,7 +496,7 @@ namespace TA4
                     if (!currentValueInStack.Equals("$"))
                     {
                         int lastIndexOfTerminalInText = -1;
-                        List<string> variantsOfTerminals = new List<string>();
+                        List<string> variantsOfTerminals = new();
                         foreach (var terminalFromTable in terminalsFromTable)
                         {
                             for (int j = 0; j < terminalFromTable.Length - 2; j++)
@@ -562,8 +562,8 @@ namespace TA4
                                     {
                                         if (!valueFromTable.Equals("$"))
                                         {
-                                            Stack<string> bufferForTextReverse = new Stack<string>();
-                                            StringBuilder currentTerminalOrNonterminal = new StringBuilder();
+                                            Stack<string> bufferForTextReverse = new();
+                                            StringBuilder currentTerminalOrNonterminal = new();
                                             for (int j = 0; j < valueFromTable.Length; j++)
                                             {
                                                 if (valueFromTable[j] == '\'')
