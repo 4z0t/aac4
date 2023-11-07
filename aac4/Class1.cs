@@ -12,7 +12,8 @@ using System.Collections;
 namespace TA4
 {
 
-
+    using Grammar = Dictionary<string, List<string>>;
+        
     public class BrokenFileException : Exception
     {
         public BrokenFileException() : base("The file is broken!") { }
@@ -20,14 +21,15 @@ namespace TA4
 
     public class DefaultDialogService
     {
+
         public string FilePath { get; set; }
-        public string BuildGrammarDictionary(string[] rules, out Dictionary<string, List<string>> grammar)
+        public string BuildGrammarDictionary(string[] rules, out Grammar grammar)
         {
-            grammar = new Dictionary<string, List<string>>();
+            grammar = new Grammar();
 
             string nonterminal = string.Empty;
-            List<string> listOfReplacementsForNonterminal = new List<string>();
-            StringBuilder subline = new StringBuilder();
+            List<string> listOfReplacementsForNonterminal = new();
+            StringBuilder subline = new();
             foreach (var line in rules)
             {
                 string replacementsForNonterminal;
@@ -152,7 +154,7 @@ namespace TA4
         public Dictionary<string, List<string>> ConstructFIRST(Dictionary<string, List<string>> grammar,
             List<string> grammarRules, string currentNonterminal, Dictionary<string, List<string>> oldFIRST)
         {
-            Dictionary<string, List<string>> newFIRST = new Dictionary<string, List<string>>(oldFIRST);
+            Dictionary<string, List<string>> newFIRST = new(oldFIRST);
 
             List<string> terminals = new List<string>();
             StringBuilder currentSentence = new StringBuilder();
@@ -244,7 +246,7 @@ namespace TA4
         public Dictionary<string, List<string>> ConstructFOLLOW(Dictionary<string, List<string>> FIRST, string startNonterminal,
             Dictionary<string, List<string>> grammar)
         {
-            Dictionary<string, List<string>> newFOLLOW = new ();
+            Dictionary<string, List<string>> newFOLLOW = new();
             if (newFOLLOW.Count != grammar.Count)
                 foreach (var nonterminal in grammar.Keys)
                     newFOLLOW.Add(nonterminal, new List<string>());
@@ -279,7 +281,7 @@ namespace TA4
                             string beta = grammarRuleForeach.Remove(0, grammarRuleForeach.IndexOf(B) + B.Length);
                             if (FIRST.ContainsKey(beta))
                             {
-                                List<string> rangeToAdd = new (FIRST[beta].Where(x => !x.Equals("ε")).
+                                List<string> rangeToAdd = new(FIRST[beta].Where(x => !x.Equals("ε")).
                                     Except(newFOLLOW[B]));
                                 if (rangeToAdd.Count != 0)
                                 {
@@ -419,7 +421,7 @@ namespace TA4
             {
                 foreach (var grammarRule in grammarRules.Value)
                 {
-                    Dictionary<string, List<string>> constructedFIRSTforProduction = new Dictionary<string, List<string>>();
+                    Dictionary<string, List<string>> constructedFIRSTforProduction = new Grammar();
                     List<string> listForCurrentGrammarRule = new List<string>
                     {
                         grammarRule
@@ -446,8 +448,8 @@ namespace TA4
             return predictiveAnalysisTable;
         }
 
-        public void TextCorrectnessVerification(DataTable predictiveAnalysisTable, Dictionary<string, List<string>> FIRST,
-            Dictionary<string, List<string>> FOLLOW, string startNonterminal, string text, int[] quantityOfSymbolsInEachLine)
+        public void TextCorrectnessVerification(DataTable predictiveAnalysisTable, Grammar FIRST,
+            Grammar FOLLOW, string startNonterminal, string text, int[] quantityOfSymbolsInEachLine)
         {
             List<KeyValuePair<int, string>> errorMessages = new();
             int indexOfCharacterInInitialText = 0;
@@ -695,7 +697,7 @@ namespace TA4
                     Console.WriteLine("Error(s) found!");
 
                     var orderedErrorList = errorMessages.OrderBy(x => x.Key).ToList();
-                    DataTable errorTable = new DataTable();
+                    DataTable errorTable = new();
                     string[] errorTableRow = { "Line", "Column", "Error Description" };
                     errorTable.Columns.AddRange(errorTableRow.Select(r => new DataColumn(r)).ToArray());
 
