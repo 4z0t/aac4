@@ -11,6 +11,13 @@ using System.Collections;
 
 namespace TA4
 {
+
+
+    public class BrokenFileException : Exception
+    {
+        public BrokenFileException() : base("The file is broken!") { }
+    }
+
     public class DefaultDialogService
     {
         public string FilePath { get; set; }
@@ -33,10 +40,8 @@ namespace TA4
                         grammar.Add(nonterminal, new List<string>(listOfReplacementsForNonterminal));
                         listOfReplacementsForNonterminal.Clear();
                     }
-                    nonterminal = Regex.Replace(line, @"(?<nonterminal><.*?>):\s.*",
-                        "${nonterminal}");
-                    replacementsForNonterminal = Regex.Replace(line, @"<.*?>:\s(?<replacements>.*)",
-                        "${replacements}");
+                    nonterminal = Regex.Replace(line, @"(?<nonterminal><.*?>):\s.*", "${nonterminal}");
+                    replacementsForNonterminal = Regex.Replace(line, @"<.*?>:\s(?<replacements>.*)", "${replacements}");
                 }
                 else if (Regex.Match(line, @"\t\|\s.*").Success && !nonterminal.Equals(string.Empty))
                 {
@@ -45,12 +50,11 @@ namespace TA4
                         listOfReplacementsForNonterminal.Add(subline.ToString());
                         subline.Clear();
                     }
-                    replacementsForNonterminal = Regex.Replace(line, @"[\t]{1}[|]{1}[\s]{1}(?<replacements>.*)",
-                        "${replacements}");
+                    replacementsForNonterminal = Regex.Replace(line, @"\t\|\s(?<replacements>.*)", "${replacements}");
                 }
                 else
                 {
-                    throw new ArgumentException("The file is broken!");
+                    throw new BrokenFileException();
                 }
 
                 if (!replacementsForNonterminal.Equals(string.Empty))
@@ -62,32 +66,32 @@ namespace TA4
                             case '<':
                                 subline.Append(replacementsForNonterminal[i++]);
                                 if (i >= replacementsForNonterminal.Length)
-                                    throw new ArgumentException("The file is broken!");
+                                    throw new ArgumentException();
                                 if (replacementsForNonterminal[i] != '>')
                                     do
                                     {
                                         if (i >= replacementsForNonterminal.Length)
-                                            throw new ArgumentException("The file is broken!");
+                                            throw new BrokenFileException();
                                         subline.Append(replacementsForNonterminal[i]);
                                     } while (replacementsForNonterminal[i++] != '>');
                                 else
-                                    throw new ArgumentException("The file is broken!");
+                                    throw new BrokenFileException();
                                 i--;
                                 break;
 
                             case '\'':
                                 subline.Append(replacementsForNonterminal[i++]);
                                 if (i >= replacementsForNonterminal.Length)
-                                    throw new ArgumentException("The file is broken!");
+                                    throw new BrokenFileException();
                                 if (replacementsForNonterminal[i] != '\'')
                                     do
                                     {
                                         if (i >= replacementsForNonterminal.Length)
-                                            throw new ArgumentException("The file is broken!");
+                                            throw new BrokenFileException();
                                         subline.Append(replacementsForNonterminal[i]);
                                     } while (replacementsForNonterminal[i++] != '\'');
                                 else
-                                    throw new ArgumentException("The file is broken!");
+                                    throw new BrokenFileException();
                                 i--;
                                 break;
 
@@ -111,14 +115,14 @@ namespace TA4
                                     }
                                     else
                                     {
-                                        throw new ArgumentException("The file is broken!");
+                                        throw new BrokenFileException();
                                     }
                                 }
                                 else
-                                    throw new ArgumentException("The file is broken!");
+                                    throw new BrokenFileException();
                                 break;
                             default:
-                                throw new ArgumentException("The file is broken!");
+                                throw new BrokenFileException();
                         }
                     }
                 }
@@ -275,7 +279,7 @@ namespace TA4
                             string beta = grammarRuleForeach.Remove(0, grammarRuleForeach.IndexOf(B) + B.Length);
                             if (FIRST.ContainsKey(beta))
                             {
-                                List<string> rangeToAdd = new List<string>(FIRST[beta].Where(x => !x.Equals("ε")).
+                                List<string> rangeToAdd = new (FIRST[beta].Where(x => !x.Equals("ε")).
                                     Except(newFOLLOW[B]));
                                 if (rangeToAdd.Count != 0)
                                 {
