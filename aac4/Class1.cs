@@ -97,6 +97,7 @@ namespace TA4
                                     if (replacementsForNonterminal[i + 1] != ' ' &&
                                         replacementsForNonterminal[i + 1] != '|')
                                     {
+                                        //subline.Append("<__>");
                                         subline.Append("' '");
                                     }
                                     else if (i + 3 < replacementsForNonterminal.Length)
@@ -129,7 +130,8 @@ namespace TA4
             listOfReplacementsForNonterminal.Add(subline.ToString());
             subline.Clear();
             grammar.Add(nonterminal, new List<string>(listOfReplacementsForNonterminal));
-            foreach (var (k,v) in grammar)
+            //grammar.Add("<__>", new List<string> { "$"});
+            foreach (var (k, v) in grammar)
             {
                 Console.WriteLine("'" + k + "'");
                 foreach (var s in v)
@@ -259,64 +261,68 @@ namespace TA4
                     {
                         // Сдвиг окна aBb в паттерне A-> aBb.
                         string grammarRule = grammarRuleForeach;
-                        if (Regex.Match("\n" + grammarRule + "\n", @"[\n]{1}.*[<]{1}.*?[>]{1}.+[\n]{1}").Success)
+                        Match match;
+                        while (true)
                         {
-                            int numberOfPatterns = Regex.Matches(grammarRule, @"[<]{1}.*?[>]{1}.").Count;
-                            for (int i = 0; i < numberOfPatterns; i++)
+                            match = Regex.Match("\n" + grammarRule + "\n", @"[\n]{1}.*[<]{1}.*?[>]{1}.+[\n]{1}");
+                            if (!match.Success)
                             {
-                                string B = Regex.Replace("\n" + grammarRule + "\n", @"[\n]{1}.*(?<B>[<]{1}.*?[>]{1}).+[\n]{1}", "${B}");
-                                string beta = grammarRuleForeach.Remove(0, grammarRuleForeach.IndexOf(B) + B.Length);
+                                break;
+                            }
 
-                                if (FIRST.ContainsKey(beta))
+                            string B = Regex.Replace("\n" + grammarRule + "\n", @"[\n]{1}.*(?<B>[<]{1}.*?[>]{1}).+[\n]{1}", "${B}");
+ 
+                            string beta = grammarRuleForeach.Remove(0, grammarRuleForeach.IndexOf(B) + B.Length);
+                            if (FIRST.ContainsKey(beta))
+                            {
+                                List<string> rangeToAdd = new List<string>(FIRST[beta].Where(x => !x.Equals("ε")).
+                                    Except(newFOLLOW[B]));
+                                if (rangeToAdd.Count != 0)
                                 {
-                                    List<string> rangeToAdd = new List<string>(FIRST[beta].Where(x => !x.Equals("ε")).
-                                        Except(newFOLLOW[B]));
+                                    newFOLLOW[B].AddRange(new List<string>(FIRST[beta].Where(x => !x.Equals("ε")).
+                                    Except(newFOLLOW[B])));
+                                    hasFOLLOWchanged = true;
+                                }
+
+                                if (FIRST[beta].Contains("ε"))
+                                {
+                                    rangeToAdd = new List<string>(newFOLLOW[grammarRules.Key].Except(newFOLLOW[B]));
                                     if (rangeToAdd.Count != 0)
                                     {
-                                        newFOLLOW[B].AddRange(new List<string>(FIRST[beta].Where(x => !x.Equals("ε")).
-                                        Except(newFOLLOW[B])));
+                                        newFOLLOW[B].AddRange(rangeToAdd);
                                         hasFOLLOWchanged = true;
                                     }
-
-                                    if (FIRST[beta].Contains("ε"))
-                                    {
-                                        rangeToAdd = new List<string>(newFOLLOW[grammarRules.Key].Except(newFOLLOW[B]));
-                                        if (rangeToAdd.Count != 0)
-                                        {
-                                            newFOLLOW[B].AddRange(rangeToAdd);
-                                            hasFOLLOWchanged = true;
-                                        }
-                                    }
                                 }
-                                else
-                                {
-                                    Dictionary<string, List<string>> temporaryFIRST = new Dictionary<string, List<string>>();
-                                    List<string> betaList = new List<string>();
-                                    betaList.Add(beta);
-                                    bool doesTemporaryFirstContainEpsilon = false;
-
-                                    temporaryFIRST = ConstructFIRST(grammar, betaList, "beta", temporaryFIRST);
-                                    if (temporaryFIRST["beta"].Contains("ε"))
-                                        doesTemporaryFirstContainEpsilon = true;
-                                    temporaryFIRST["beta"] = new List<string>((temporaryFIRST["beta"]).Except(newFOLLOW[B]));
-                                    if (temporaryFIRST["beta"].Count != 0)
-                                    {
-                                        newFOLLOW[B].AddRange(temporaryFIRST["beta"].Except(newFOLLOW[B]));
-                                        hasFOLLOWchanged = true;
-                                    }
-
-                                    if (doesTemporaryFirstContainEpsilon)
-                                    {
-                                        List<string> rangeToAdd = new List<string>(newFOLLOW[grammarRules.Key].Except(newFOLLOW[B]));
-                                        if (rangeToAdd.Count != 0)
-                                        {
-                                            newFOLLOW[B].AddRange(rangeToAdd);
-                                            hasFOLLOWchanged = true;
-                                        }
-                                    }
-                                }
-                                grammarRule = Regex.Replace(grammarRule, B, "");
                             }
+                            else
+                            {
+                                Dictionary<string, List<string>> temporaryFIRST = new Dictionary<string, List<string>>();
+                                List<string> betaList = new List<string>();
+                                betaList.Add(beta);
+                                bool doesTemporaryFirstContainEpsilon = false;
+
+                                temporaryFIRST = ConstructFIRST(grammar, betaList, "beta", temporaryFIRST);
+                                if (temporaryFIRST["beta"].Contains("ε"))
+                                    doesTemporaryFirstContainEpsilon = true;
+                                temporaryFIRST["beta"] = new List<string>((temporaryFIRST["beta"]).Except(newFOLLOW[B]));
+                                if (temporaryFIRST["beta"].Count != 0)
+                                {
+                                    newFOLLOW[B].AddRange(temporaryFIRST["beta"].Except(newFOLLOW[B]));
+                                    hasFOLLOWchanged = true;
+                                }
+
+                                if (doesTemporaryFirstContainEpsilon)
+                                {
+                                    List<string> rangeToAdd = new List<string>(newFOLLOW[grammarRules.Key].Except(newFOLLOW[B]));
+                                    if (rangeToAdd.Count != 0)
+                                    {
+                                        newFOLLOW[B].AddRange(rangeToAdd);
+                                        hasFOLLOWchanged = true;
+                                    }
+                                }
+                            }
+                            grammarRule = Regex.Replace(grammarRule, B, "");
+
                         }
                         if (Regex.Match("\n" + grammarRule + "\n", @"[\n]{1}.*[<]{1}.*?[>]{1}[\n]{1}").Success)
                         {
