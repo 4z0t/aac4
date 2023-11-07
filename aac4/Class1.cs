@@ -716,9 +716,11 @@ namespace TA4
                     errorTableDataView.AllowEdit = false;
                     errorTableDataView.AllowDelete = false;
                     errorTableDataView.AllowNew = false;
+
                     //PredictiveAnalysisTable errorTableWindow =
                     //            new PredictiveAnalysisTable(errorTableDataView, "Table Of Errors");
                     //errorTableWindow.Show();
+                    PrintTableOrView(errorTable, "Table Of Errors");
                 }
             }
             catch (Exception ex)
@@ -726,5 +728,29 @@ namespace TA4
                 Console.WriteLine(ex.Message);
             }
         }
+
+        static private void PrintTableOrView(DataTable table, string label)
+        {
+            Console.WriteLine("\n" + label);
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+                Console.Write(table.Columns[i].ColumnName);
+                Console.Write("\t");
+            }
+            Console.WriteLine();
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                var row = table.Rows[i];
+                foreach (var item in row.ItemArray)
+                {
+                    Console.Write(item);
+                    Console.Write("\t");
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+        }
     }
+
+
 }
