@@ -33,12 +33,12 @@ namespace TA4
                         grammar.Add(nonterminal, new List<string>(listOfReplacementsForNonterminal));
                         listOfReplacementsForNonterminal.Clear();
                     }
-                    nonterminal = Regex.Replace(line, @"(?<nonterminal>[<]{1}.*?[>]{1})[:]{1}[\s]{1}.*",
+                    nonterminal = Regex.Replace(line, @"(?<nonterminal><.*?>):\s.*",
                         "${nonterminal}");
-                    replacementsForNonterminal = Regex.Replace(line, @"[<]{1}.*?[>]{1}[:]{1}[\s]{1}(?<replacements>.*)",
+                    replacementsForNonterminal = Regex.Replace(line, @"<.*?>:\s(?<replacements>.*)",
                         "${replacements}");
                 }
-                else if (Regex.Match(line, @"[\t]{1}[|]{1}[\s]{1}.*").Success && !nonterminal.Equals(string.Empty))
+                else if (Regex.Match(line, @"\t\|\s.*").Success && !nonterminal.Equals(string.Empty))
                 {
                     if (subline.Length != 0)
                     {
@@ -264,13 +264,13 @@ namespace TA4
                         Match match;
                         while (true)
                         {
-                            match = Regex.Match("\n" + grammarRule + "\n", @"[\n]{1}.*[<]{1}.*?[>]{1}.+[\n]{1}");
+                            match = Regex.Match(grammarRule, @"^.*?(<.*?>).+$");
                             if (!match.Success)
                             {
                                 break;
                             }
 
-                            string B = Regex.Replace("\n" + grammarRule + "\n", @"[\n]{1}.*(?<B>[<]{1}.*?[>]{1}).+[\n]{1}", "${B}");
+                            string B = match.Groups[1].Value;
  
                             string beta = grammarRuleForeach.Remove(0, grammarRuleForeach.IndexOf(B) + B.Length);
                             if (FIRST.ContainsKey(beta))
@@ -324,9 +324,10 @@ namespace TA4
                             grammarRule = Regex.Replace(grammarRule, B, "");
 
                         }
-                        if (Regex.Match("\n" + grammarRule + "\n", @"[\n]{1}.*[<]{1}.*?[>]{1}[\n]{1}").Success)
+                        match = Regex.Match(grammarRule, @"^.*(<.*?>)$");
+                        if (match.Success)
                         {
-                            string B = Regex.Replace("\n" + grammarRule + "\n", @"[\n]{1}.*(?<B>[<]{1}.*?[>]{1})[\n]{1}", "${B}");
+                            string B = match.Groups[1].Value;
                             List<string> rangeToAdd = new List<string>((newFOLLOW[grammarRules.Key]).Except(newFOLLOW[B]));
                             if (rangeToAdd.Count != 0)
                             {
