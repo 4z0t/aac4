@@ -244,7 +244,7 @@ namespace TA4
         public Dictionary<string, List<string>> ConstructFOLLOW(Dictionary<string, List<string>> FIRST, string startNonterminal,
             Dictionary<string, List<string>> grammar)
         {
-            Dictionary<string, List<string>> newFOLLOW = new Dictionary<string, List<string>>();
+            Dictionary<string, List<string>> newFOLLOW = new ();
             if (newFOLLOW.Count != grammar.Count)
                 foreach (var nonterminal in grammar.Keys)
                     newFOLLOW.Add(nonterminal, new List<string>());

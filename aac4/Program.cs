@@ -14,7 +14,7 @@ namespace TA4
     {
         static void Main(string[] args)
         {
-            if(args.Length != 2) 
+            if (args.Length != 2)
             {
                 Console.Error.WriteLine("Expected 2 arguments");
                 return;
@@ -22,13 +22,6 @@ namespace TA4
             string grammarFilePath = args[0];
             string targetFilePath = args[1];
 
-            string sentence;
-            string lineNumbersContent;
-            bool unusedTextBox;
-            string textBlockVisibility;
-
-            string predictiveAnalysisTableName;
-            DataView predictiveAnalysisDataTable;
             string startNonterminal;
             Dictionary<string, List<string>> FIRST;
             Dictionary<string, List<string>> FOLLOW;
