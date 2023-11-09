@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
+﻿using System.Data;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace aac4
 {
@@ -170,7 +166,7 @@ namespace aac4
 
         private Rules ContinueFIRST(Rules oldFirst, string currentNonterminal, List<string> grammarRules)
         {
-            Rules newFirst = new Rules(oldFirst);
+            Rules newFirst = new(oldFirst);
 
             return newFirst;
         }
