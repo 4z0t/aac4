@@ -557,19 +557,13 @@ namespace aac4
                                             {
                                                 if (valueFromTable[j] == '\'')
                                                 {
-                                                    currentTerminalOrNonterminal.Append(valueFromTable[j++]);
-                                                    while (valueFromTable[j] != '\'')
-                                                        currentTerminalOrNonterminal.Append(valueFromTable[j++]);
-                                                    currentTerminalOrNonterminal.Append(valueFromTable[j]);
+                                                    Seek(valueFromTable, ref currentTerminalOrNonterminal, '\'', '\'', ref j);
                                                     bufferForTextReverse.Push(currentTerminalOrNonterminal.ToString());
                                                     currentTerminalOrNonterminal.Clear();
                                                 }
                                                 else if (valueFromTable[j] == '<')
                                                 {
-                                                    currentTerminalOrNonterminal.Append(valueFromTable[j++]);
-                                                    while (valueFromTable[j] != '>')
-                                                        currentTerminalOrNonterminal.Append(valueFromTable[j++]);
-                                                    currentTerminalOrNonterminal.Append(valueFromTable[j]);
+                                                    Seek(valueFromTable, ref currentTerminalOrNonterminal, '<', '>', ref j);
                                                     bufferForTextReverse.Push(currentTerminalOrNonterminal.ToString());
                                                     currentTerminalOrNonterminal.Clear();
                                                 }
