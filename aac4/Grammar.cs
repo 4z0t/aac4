@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -178,6 +179,14 @@ namespace aac4
         {
 
         }
+
+        public DataTable MakePredictiveAnalysisTable()
+        {
+            DataTable predictiveAnalysisTable = new();
+
+            return predictiveAnalysisTable;
+        }
+
 
         private string? BreakNonTerm(string replacement, in StringBuilder subline)
         {

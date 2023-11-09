@@ -240,7 +240,7 @@ namespace aac4
 
         public GrammarDict ConstructFOLLOW(GrammarDict FIRST, string startNonterminal, GrammarDict grammar)
         {
-            Dictionary<string, List<string>> newFOLLOW = new();
+            GrammarDict newFOLLOW = new();
             if (newFOLLOW.Count != grammar.Count)
                 foreach (var nonterminal in grammar.Keys)
                     newFOLLOW.Add(nonterminal, new List<string>());
@@ -296,18 +296,12 @@ namespace aac4
                             }
                             else
                             {
-                                Dictionary<string, List<string>> temporaryFIRST = new Dictionary<string, List<string>>();
-                                List<string> betaList = new List<string>
-                                {
-                                    beta
-                                };
-
                                 bool doesTemporaryFirstContainEpsilon = false;
 
-                                temporaryFIRST = ConstructFIRST(grammar, betaList, "beta", temporaryFIRST);
+                                GrammarDict temporaryFIRST = ConstructFIRST(grammar, new List<string> { beta }, "beta", new());
                                 if (temporaryFIRST["beta"].Contains("ε"))
                                     doesTemporaryFirstContainEpsilon = true;
-                                temporaryFIRST["beta"] = new List<string>((temporaryFIRST["beta"]).Except(newFOLLOW[B]));
+                                temporaryFIRST["beta"] = new List<string>(temporaryFIRST["beta"].Except(newFOLLOW[B]));
                                 if (temporaryFIRST["beta"].Count != 0)
                                 {
                                     newFOLLOW[B].AddRange(temporaryFIRST["beta"].Except(newFOLLOW[B]));
@@ -331,7 +325,7 @@ namespace aac4
                         if (match.Success)
                         {
                             string B = match.Groups[1].Value;
-                            List<string> rangeToAdd = new((newFOLLOW[grammarRules.Key]).Except(newFOLLOW[B]));
+                            List<string> rangeToAdd = new(newFOLLOW[grammarRules.Key].Except(newFOLLOW[B]));
                             if (rangeToAdd.Count != 0)
                             {
                                 newFOLLOW[B].AddRange(rangeToAdd);
