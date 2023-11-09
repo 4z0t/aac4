@@ -4,10 +4,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections;
 
-namespace TA4
+namespace aac4
 {
 
-    using Grammar = Dictionary<string, List<string>>;
+    using GrammarDict = Dictionary<string, List<string>>;
 
     public class BrokenFileException : Exception
     {
@@ -18,9 +18,9 @@ namespace TA4
     {
 
         public string FilePath { get; set; }
-        public string BuildGrammarDictionary(string[] rules, out Grammar grammar)
+        public string BuildGrammarDictionary(string[] rules, out GrammarDict grammar)
         {
-            grammar = new Grammar();
+            grammar = new GrammarDict();
 
             string nonterminal = string.Empty;
             List<string> listOfReplacementsForNonterminal = new();
@@ -53,6 +53,7 @@ namespace TA4
                 {
                     throw new BrokenFileException();
                 }
+
 
                 if (!replacementsForNonterminal.Equals(string.Empty))
                 {
@@ -131,7 +132,6 @@ namespace TA4
             listOfReplacementsForNonterminal.Add(subline.ToString());
             subline.Clear();
             grammar.Add(nonterminal, new List<string>(listOfReplacementsForNonterminal));
-            //grammar.Add("<__>", new List<string> { "$"});
             //foreach (var (k, v) in grammar)
             //{
             //    Console.WriteLine("'" + k + "'");
@@ -142,13 +142,20 @@ namespace TA4
             //}
             listOfReplacementsForNonterminal.Clear();
 
-            return Regex.Replace(rules[0], @"(?<nonterminal><.*?>):\s.*",
-                        "${nonterminal}");
+            return Regex.Replace(rules[0], @"(?<nonterminal><.*?>):\s.*", "${nonterminal}");
         }
 
-        public Grammar ConstructFIRST(Grammar grammar, List<string> grammarRules, string currentNonterminal, Grammar oldFIRST)
+        public static void Seek(string s, ref StringBuilder sb, char start, char end, ref int i)
         {
-            Grammar newFIRST = new(oldFIRST);
+            sb.Append(start);
+            while (s[++i] != end)
+                sb.Append(s[i]);
+            sb.Append(end);
+        }
+
+        public GrammarDict ConstructFIRST(GrammarDict grammar, List<string> grammarRules, string currentNonterminal, GrammarDict oldFIRST)
+        {
+            GrammarDict newFIRST = new(oldFIRST);
 
             List<string> terminals = new();
             StringBuilder currentSentence = new();
@@ -161,16 +168,10 @@ namespace TA4
                     switch (grammarRule[i])
                     {
                         case '<':
-                            currentSentence.Append("<");
-                            while (grammarRule[++i] != '>')
-                                currentSentence.Append(grammarRule[i]);
-                            currentSentence.Append(">");
+                            Seek(grammarRule, ref currentSentence, '<', '>', ref i);
                             break;
                         case '\'':
-                            currentSentence.Append("'");
-                            while (grammarRule[++i] != '\'')
-                                currentSentence.Append(grammarRule[i]);
-                            currentSentence.Append("'");
+                            Seek(grammarRule, ref currentSentence, '\'', '\'', ref i);
                             break;
                         case '$':
                             currentSentence.Append("ε");
@@ -237,7 +238,7 @@ namespace TA4
             return newFIRST;
         }
 
-        public Grammar ConstructFOLLOW(Grammar FIRST, string startNonterminal, Grammar grammar)
+        public GrammarDict ConstructFOLLOW(GrammarDict FIRST, string startNonterminal, GrammarDict grammar)
         {
             Dictionary<string, List<string>> newFOLLOW = new();
             if (newFOLLOW.Count != grammar.Count)
@@ -344,7 +345,7 @@ namespace TA4
             return newFOLLOW;
         }
 
-        public DataTable GeneratePredictiveAnalysisTable(Grammar grammar, Grammar FIRST, Grammar FOLLOW)
+        public DataTable GeneratePredictiveAnalysisTable(GrammarDict grammar, GrammarDict FIRST, GrammarDict FOLLOW)
         {
             DataTable predictiveAnalysisTable = new();
             List<string> headerRow = new()
@@ -413,7 +414,7 @@ namespace TA4
             {
                 foreach (var grammarRule in grammarRules.Value)
                 {
-                    Grammar constructedFIRSTforProduction = new();
+                    GrammarDict constructedFIRSTforProduction = new();
                     List<string> listForCurrentGrammarRule = new()
                     {
                         grammarRule
@@ -440,8 +441,8 @@ namespace TA4
             return predictiveAnalysisTable;
         }
 
-        public void TextCorrectnessVerification(DataTable predictiveAnalysisTable, Grammar FIRST,
-            Grammar FOLLOW, string startNonterminal, string text, int[] quantityOfSymbolsInEachLine)
+        public void TextCorrectnessVerification(DataTable predictiveAnalysisTable, GrammarDict FIRST,
+            GrammarDict FOLLOW, string startNonterminal, string text, int[] quantityOfSymbolsInEachLine)
         {
             List<KeyValuePair<int, string>> errorMessages = new();
             int indexOfCharacterInInitialText = 0;

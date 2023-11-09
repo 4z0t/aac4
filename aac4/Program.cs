@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace TA4
+namespace aac4
 {
     class Program
     {
@@ -31,9 +31,10 @@ namespace TA4
             string[] machineFromTXT = File.ReadAllLines(grammarFilePath);
             if (machineFromTXT.Length != 0)
             {
-                Dictionary<string, List<string>> grammar;
-                startNonterminal = dialogService.BuildGrammarDictionary(machineFromTXT, out grammar);
+                Grammar g = new(machineFromTXT);
 
+                startNonterminal = g.StartNonTerm;
+                var grammar = g.Rules;
 
                 FIRST = new Dictionary<string, List<string>>();
                 foreach (var grammarRules in grammar)
