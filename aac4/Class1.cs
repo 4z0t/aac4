@@ -555,17 +555,20 @@ namespace aac4
                                             StringBuilder currentTerminalOrNonterminal = new();
                                             for (int j = 0; j < valueFromTable.Length; j++)
                                             {
-                                                if (valueFromTable[j] == '\'')
+                                                switch (valueFromTable[j])
                                                 {
-                                                    Seek(valueFromTable, ref currentTerminalOrNonterminal, '\'', '\'', ref j);
-                                                    bufferForTextReverse.Push(currentTerminalOrNonterminal.ToString());
-                                                    currentTerminalOrNonterminal.Clear();
-                                                }
-                                                else if (valueFromTable[j] == '<')
-                                                {
-                                                    Seek(valueFromTable, ref currentTerminalOrNonterminal, '<', '>', ref j);
-                                                    bufferForTextReverse.Push(currentTerminalOrNonterminal.ToString());
-                                                    currentTerminalOrNonterminal.Clear();
+                                                    case '\'':
+                                                        Seek(valueFromTable, ref currentTerminalOrNonterminal, '\'', '\'', ref j);
+                                                        bufferForTextReverse.Push(currentTerminalOrNonterminal.ToString());
+                                                        currentTerminalOrNonterminal.Clear();
+                                                        break;
+                                                    case '<':
+                                                        Seek(valueFromTable, ref currentTerminalOrNonterminal, '<', '>', ref j);
+                                                        bufferForTextReverse.Push(currentTerminalOrNonterminal.ToString());
+                                                        currentTerminalOrNonterminal.Clear();
+                                                        break;
+                                                    default:
+                                                        break;
                                                 }
                                             }
                                             while (bufferForTextReverse.Count != 0)
