@@ -470,7 +470,7 @@ namespace aac4
                 while (true)
                 {
                     string currentValueInStack = stack.Pop();
-                    if (!yetAnotherRow[2].Equals("start"))
+                    if (yetAnotherRow[2] != "start")
                     {
                         Array.Clear(yetAnotherRow, 0, yetAnotherRow.Length);
                         yetAnotherRow[0] = string.Join("", changedStack.ToArray().Select(x => x.ToString()).ToArray())
@@ -482,7 +482,7 @@ namespace aac4
                     {
                         yetAnotherRow[2] = "";
                     }
-                    if (!currentValueInStack.Equals("$"))
+                    if (currentValueInStack != "$")
                     {
                         int lastIndexOfTerminalInText = -1;
                         List<string> variantsOfTerminals = new();
@@ -528,7 +528,7 @@ namespace aac4
                         {
                             lastIndexOfTerminalInText++;
                         }
-                        if (currentValueInStack.Equals('\'' + text.Substring(0, lastIndexOfTerminalInText) + '\''))
+                        if (currentValueInStack == $"\'{text.Substring(0, lastIndexOfTerminalInText)}\'")
                         {
                             text = text.Remove(0, lastIndexOfTerminalInText);
                             analysisResultsTable.Rows.Add(yetAnotherRow);
@@ -546,10 +546,10 @@ namespace aac4
                                     isCurrentValueInStackNonterminal = true;
 
                                     string valueFromTable = (string)predictiveAnalysisTable.
-                                        Rows[i]['\'' + text.Substring(0, lastIndexOfTerminalInText) + '\''];
+                                        Rows[i][$"\'{text.Substring(0, lastIndexOfTerminalInText)}\'"];
                                     if (!valueFromTable.Equals("") && !valueFromTable.Equals("Synch"))
                                     {
-                                        if (!valueFromTable.Equals("$"))
+                                        if (valueFromTable != "$")
                                         {
                                             Stack<string> bufferForTextReverse = new();
                                             StringBuilder currentTerminalOrNonterminal = new();
@@ -586,7 +586,7 @@ namespace aac4
                                             changedStack.RemoveAt(changedStack.Count - 1);
                                         }
                                     }
-                                    else if (valueFromTable.Equals("Synch"))
+                                    else if (valueFromTable == "Synch")
                                     {
                                         if (stack.Count < 3)
                                         {
