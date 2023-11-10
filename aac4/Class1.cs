@@ -354,7 +354,7 @@ namespace aac4
                     headerColumn.Add(term);
                     foreach (var grammarRule in rule)
                     {
-                        for (int i = 0; i < grammarRule.Count(); i++)
+                        for (int i = 0; i < grammarRule.Length; i++)
                         {
                             if (grammarRule[i] == '\'')
                             {
@@ -384,12 +384,12 @@ namespace aac4
             // Adds synch symbols.
             foreach (var (term, _) in grammar)
             {
-                for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
-                    if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals") == term)
+                foreach (DataRow row in predictiveAnalysisTable.Rows)
+                    if (row.Field<string>("Nonterminals") == term)
                     {
                         foreach (var elementFromFOLLOW in FOLLOW[term])
                         {
-                            predictiveAnalysisTable.Rows[i][elementFromFOLLOW] = "Synch";
+                            row[elementFromFOLLOW] = "Synch";
                         }
                     }
             }
@@ -426,20 +426,20 @@ namespace aac4
             int indexOfCharacterInInitialText = 0;
 
             DataTable analysisResultsTable = new();
-            string[] yetAnotherRow = new string[3] { "Stack", "Input", "Remark" };
+            string[] infoRow = new string[3] { "Stack", "Input", "Remark" };
             ArrayList changedStack = new();
 
-            analysisResultsTable.Columns.AddRange(yetAnotherRow.Select(r => new DataColumn(r)).ToArray());
-            Array.Clear(yetAnotherRow, 0, yetAnotherRow.Length);
+            analysisResultsTable.Columns.AddRange(infoRow.Select(r => new DataColumn(r)).ToArray());
+            Array.Clear(infoRow, 0, infoRow.Length);
 
             text = text.Replace("\r\n", " ") + "$";
             string initialText = text;
             Stack<string> stack = new();
             stack.Push("$");
             stack.Push(startNonterminal);
-            yetAnotherRow[0] = "$" + startNonterminal;
-            yetAnotherRow[1] = text;
-            yetAnotherRow[2] = "start";
+            infoRow[0] = $"${startNonterminal}";
+            infoRow[1] = text;
+            infoRow[2] = "start";
             changedStack.Add("$");
             List<string> terminalsFromTable = new();
             foreach (DataColumn terminal in predictiveAnalysisTable.Columns)
@@ -451,15 +451,15 @@ namespace aac4
                 while (true)
                 {
                     string currentValueInStack = stack.Pop();
-                    if (yetAnotherRow[2] != "start")
+                    if (infoRow[2] != "start")
                     {
-                        Array.Clear(yetAnotherRow, 0, yetAnotherRow.Length);
-                        yetAnotherRow[0] = string.Join("", changedStack.ToArray().Select(x => x.ToString()).ToArray())
+                        Array.Clear(infoRow, 0, infoRow.Length);
+                        infoRow[0] = string.Join("", changedStack.ToArray().Select(x => x.ToString()).ToArray())
                             + currentValueInStack;
-                        yetAnotherRow[1] = text;
+                        infoRow[1] = text;
                     }
 
-                    yetAnotherRow[2] = "";
+                    infoRow[2] = "";
 
                     if (currentValueInStack != "$")
                     {
@@ -489,8 +489,8 @@ namespace aac4
                                 Aggregate((max, cur) => max.Length > cur.Length ? max : cur).Count() - 3;
                         if (lastIndexOfTerminalInText == -1)
                         {
-                            yetAnotherRow[2] = $"Error, remove {currentValueInStack} from the top of the stack and skip <<{text[0]}>>";
-                            analysisResultsTable.Rows.Add(yetAnotherRow);
+                            infoRow[2] = $"Error, remove {currentValueInStack} from the top of the stack and skip <<{text[0]}>>";
+                            analysisResultsTable.Rows.Add(infoRow);
 
                             errorMessages.Add(new(indexOfCharacterInInitialText, $"Invalid character '{text[0]}'"));
                             indexOfCharacterInInitialText += 1;
@@ -508,7 +508,7 @@ namespace aac4
                         if (currentValueInStack == $"\'{text.Substring(0, lastIndexOfTerminalInText)}\'")
                         {
                             text = text.Remove(0, lastIndexOfTerminalInText);
-                            analysisResultsTable.Rows.Add(yetAnotherRow);
+                            analysisResultsTable.Rows.Add(infoRow);
                             changedStack.RemoveAt(changedStack.Count - 1);
 
                             indexOfCharacterInInitialText += lastIndexOfTerminalInText;
@@ -516,13 +516,13 @@ namespace aac4
                         else
                         {
                             bool isCurrentValueInStackNonterminal = false;
-                            for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
+                            foreach (DataRow row in predictiveAnalysisTable.Rows)
                             {
-                                if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals") == currentValueInStack)
+                                if (row.Field<string>("Nonterminals") == currentValueInStack)
                                 {
                                     isCurrentValueInStackNonterminal = true;
 
-                                    string valueFromTable = (string)predictiveAnalysisTable.Rows[i][$"\'{text.Substring(0, lastIndexOfTerminalInText)}\'"];
+                                    string valueFromTable = (string)row[$"\'{text[..lastIndexOfTerminalInText]}\'"];
                                     if (valueFromTable != string.Empty && valueFromTable != "Synch")
                                     {
                                         if (valueFromTable != "$")
@@ -549,16 +549,16 @@ namespace aac4
                                             }
                                             while (bufferForTextReverse.Count != 0)
                                             {
-                                                string popedBufferElement = bufferForTextReverse.Pop();
+                                                string element = bufferForTextReverse.Pop();
                                                 if (bufferForTextReverse.Count > 0)
-                                                    changedStack.Add(popedBufferElement);
-                                                stack.Push(popedBufferElement);
+                                                    changedStack.Add(element);
+                                                stack.Push(element);
                                             }
-                                            analysisResultsTable.Rows.Add(yetAnotherRow);
+                                            analysisResultsTable.Rows.Add(infoRow);
                                         }
                                         else
                                         {
-                                            analysisResultsTable.Rows.Add(yetAnotherRow);
+                                            analysisResultsTable.Rows.Add(infoRow);
                                             changedStack.RemoveAt(changedStack.Count - 1);
                                         }
                                     }
@@ -566,8 +566,8 @@ namespace aac4
                                     {
                                         if (stack.Count < 3)
                                         {
-                                            yetAnotherRow[2] = $"Error, skip <<{text[..lastIndexOfTerminalInText]}>>";
-                                            analysisResultsTable.Rows.Add(yetAnotherRow);
+                                            infoRow[2] = $"Error, skip <<{text[..lastIndexOfTerminalInText]}>>";
+                                            analysisResultsTable.Rows.Add(infoRow);
 
                                             errorMessages.Add(new(indexOfCharacterInInitialText, $"Can't recognize the word! {text[..lastIndexOfTerminalInText]} was skipped"));
                                             indexOfCharacterInInitialText += lastIndexOfTerminalInText;
@@ -577,8 +577,8 @@ namespace aac4
                                         }
                                         else
                                         {
-                                            yetAnotherRow[2] = $"Error, PredictiveAnalysisTable[{currentValueInStack}, {text[..lastIndexOfTerminalInText]}] = Synch";
-                                            analysisResultsTable.Rows.Add(yetAnotherRow);
+                                            infoRow[2] = $"Error, PredictiveAnalysisTable[{currentValueInStack}, {text[..lastIndexOfTerminalInText]}] = Synch";
+                                            analysisResultsTable.Rows.Add(infoRow);
 
                                             changedStack.RemoveAt(changedStack.Count - 1);
 
@@ -587,10 +587,10 @@ namespace aac4
                                     }
                                     else if (string.Empty == valueFromTable)
                                     {
-                                        if (text.Count() > 1)
+                                        if (text.Length > 1)
                                         {
-                                            yetAnotherRow[2] = $"Error, skip <<{text[..lastIndexOfTerminalInText]}>>";
-                                            analysisResultsTable.Rows.Add(yetAnotherRow);
+                                            infoRow[2] = $"Error, skip <<{text[..lastIndexOfTerminalInText]}>>";
+                                            analysisResultsTable.Rows.Add(infoRow);
 
                                             errorMessages.Add(new(indexOfCharacterInInitialText, $"Can't recognize the word! {text[..lastIndexOfTerminalInText]} was skipped"));
                                             indexOfCharacterInInitialText += lastIndexOfTerminalInText;
@@ -613,8 +613,8 @@ namespace aac4
                             }
                             if (!isCurrentValueInStackNonterminal)
                             {
-                                yetAnotherRow[2] = $"Error, remove {currentValueInStack} from the top of the stack";
-                                analysisResultsTable.Rows.Add(yetAnotherRow);
+                                infoRow[2] = $"Error, remove {currentValueInStack} from the top of the stack";
+                                analysisResultsTable.Rows.Add(infoRow);
 
                                 errorMessages.Add(new(indexOfCharacterInInitialText, $"Invalid character! {currentValueInStack} was expected"));
                                 indexOfCharacterInInitialText += lastIndexOfTerminalInText;
@@ -625,15 +625,15 @@ namespace aac4
                     }
                     else if (text == "$")
                     {
-                        analysisResultsTable.Rows.Add(yetAnotherRow);
+                        analysisResultsTable.Rows.Add(infoRow);
                         PrintTableOrView(analysisResultsTable, "Result Table");
                         break;
                     }
                     else
                     {
-                        yetAnotherRow[2] = $"Error, skip <<{text}>>";
+                        infoRow[2] = $"Error, skip <<{text}>>";
 
-                        analysisResultsTable.Rows.Add(yetAnotherRow);
+                        analysisResultsTable.Rows.Add(infoRow);
                         PrintTableOrView(analysisResultsTable, "Result Table");
                         errorMessages.Add(new(indexOfCharacterInInitialText, "Unexpected end of the text"));
                         break;
@@ -657,12 +657,11 @@ namespace aac4
                     int endIndexOfCurrentLine = quantityOfSymbolsInEachLine[0];
                     foreach (var orderedErrorListRecord in orderedErrorList)
                     {
-                        for (int i = 0; i < quantityOfSymbolsInEachLine.Count(); i++)
+                        for (int i = 0; i < quantityOfSymbolsInEachLine.Length; i++)
                         {
                             if (orderedErrorListRecord.Key < endIndexOfCurrentLine + 1)
                             {
-                                int currentCharNumber =
-                                    orderedErrorListRecord.Key - (endIndexOfCurrentLine - (quantityOfSymbolsInEachLine[i] + 1));
+                                int currentCharNumber = orderedErrorListRecord.Key - (endIndexOfCurrentLine - (quantityOfSymbolsInEachLine[i] + 1));
                                 errorTable.Rows.Add((i + 1).ToString(), currentCharNumber.ToString(), orderedErrorListRecord.Value);
 
                                 endIndexOfCurrentLine = quantityOfSymbolsInEachLine[0];
@@ -670,7 +669,7 @@ namespace aac4
                             }
                             else
                             {
-                                if (i + 1 < quantityOfSymbolsInEachLine.Count())
+                                if (i + 1 < quantityOfSymbolsInEachLine.Length)
                                     endIndexOfCurrentLine += quantityOfSymbolsInEachLine[i + 1] + 1;
                             }
                         }
@@ -688,15 +687,14 @@ namespace aac4
         static private void PrintTableOrView(DataTable table, string label)
         {
             Console.WriteLine("\n" + label);
-            for (int i = 0; i < table.Columns.Count; i++)
+            foreach (DataColumn coloumn in table.Columns)
             {
-                Console.Write(table.Columns[i].ColumnName);
+                Console.Write(coloumn.ColumnName);
                 Console.Write("\t");
             }
             Console.WriteLine();
-            for (int i = 0; i < table.Rows.Count; i++)
+            foreach (DataRow row in table.Rows)
             {
-                var row = table.Rows[i];
                 foreach (var item in row.ItemArray)
                 {
                     Console.Write(item);
