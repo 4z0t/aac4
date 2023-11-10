@@ -445,9 +445,6 @@ namespace aac4
             foreach (DataColumn terminal in predictiveAnalysisTable.Columns)
                 if (terminal.ColumnName != "Nonterminals")
                     terminalsFromTable.Add(terminal.ColumnName);
-            List<string> nonterminalsFromTable = new();
-            for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
-                nonterminalsFromTable.Add((string)predictiveAnalysisTable.Rows[i][0]);
 
             try
             {
@@ -638,7 +635,7 @@ namespace aac4
 
                         analysisResultsTable.Rows.Add(yetAnotherRow);
                         PrintTableOrView(analysisResultsTable, "Result Table");
-                        errorMessages.Add(new (indexOfCharacterInInitialText, "Unexpected end of the text"));
+                        errorMessages.Add(new(indexOfCharacterInInitialText, "Unexpected end of the text"));
                         break;
                     }
 
