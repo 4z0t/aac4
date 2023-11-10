@@ -407,8 +407,7 @@ namespace aac4
                     {
                         grammarRule
                     };
-                    constructedFIRSTforProduction = this.ConstructFIRST(grammar, listForCurrentGrammarRule,
-                        "test", constructedFIRSTforProduction);
+                    constructedFIRSTforProduction = this.ConstructFIRST(grammar, listForCurrentGrammarRule, "test", constructedFIRSTforProduction);
                     foreach (var terminal in constructedFIRSTforProduction["test"])
                     {
                         if (!terminal.Equals("ε"))
@@ -535,13 +534,13 @@ namespace aac4
                             bool isCurrentValueInStackNonterminal = false;
                             for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
                             {
-                                if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals").Equals(currentValueInStack))
+                                if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals") == currentValueInStack)
                                 {
                                     isCurrentValueInStackNonterminal = true;
 
                                     string valueFromTable = (string)predictiveAnalysisTable.
                                         Rows[i][$"\'{text.Substring(0, lastIndexOfTerminalInText)}\'"];
-                                    if (!valueFromTable.Equals("") && !valueFromTable.Equals("Synch"))
+                                    if (!valueFromTable.Equals("") && valueFromTable != "Synch")
                                     {
                                         if (valueFromTable != "$")
                                         {
@@ -606,7 +605,7 @@ namespace aac4
                                                 "Invalid characters '" + text.Substring(0, lastIndexOfTerminalInText) + "'"));
                                         }
                                     }
-                                    else if (valueFromTable.Equals(""))
+                                    else if (string.Empty == valueFromTable)
                                     {
                                         if (text.Count() > 1)
                                         {
@@ -648,7 +647,7 @@ namespace aac4
                     }
                     else
                     {
-                        if (text.Equals("$"))
+                        if (text == "$")
                         {
                             analysisResultsTable.Rows.Add(yetAnotherRow);
                             PrintTableOrView(analysisResultsTable, "Result Table");
