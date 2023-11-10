@@ -360,16 +360,10 @@ namespace aac4
                         {
                             if (grammarRule[i] == '\'')
                             {
-                                i++;
-                                buffer.Append('\'');
-                                while (grammarRule[i] != '\'')
-                                {
-                                    buffer.Append(grammarRule[i]);
-                                    i++;
-                                }
-                                buffer.Append('\'');
-                                if (!headerRow.Contains(buffer.ToString()))
-                                    headerRow.Add(buffer.ToString());
+                                Seek(grammarRule, ref buffer, '\'', '\'', ref i);
+                                var s = buffer.ToString();
+                                if (!headerRow.Contains(s))
+                                    headerRow.Add(s);
                                 buffer.Clear();
                             }
                             else if (grammarRule[i] == '$' && !headerRow.Contains("'$'"))
