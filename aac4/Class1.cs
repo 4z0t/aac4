@@ -349,10 +349,10 @@ namespace aac4
             List<string> headerColumn = new();
             {
                 StringBuilder buffer = new();
-                foreach (var grammarRules in grammar)
+                foreach (var (term, rule) in grammar)
                 {
-                    headerColumn.Add(grammarRules.Key);
-                    foreach (var grammarRule in grammarRules.Value)
+                    headerColumn.Add(term);
+                    foreach (var grammarRule in rule)
                     {
                         for (int i = 0; i < grammarRule.Count(); i++)
                         {
@@ -382,12 +382,12 @@ namespace aac4
             }
 
             // Adds synch symbols.
-            foreach (var grammarRules in grammar)
+            foreach (var (term, _) in grammar)
             {
                 for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
-                    if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals").Equals(grammarRules.Key))
+                    if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals") == term)
                     {
-                        foreach (var elementFromFOLLOW in FOLLOW[grammarRules.Key])
+                        foreach (var elementFromFOLLOW in FOLLOW[term])
                         {
                             predictiveAnalysisTable.Rows[i][elementFromFOLLOW] = "Synch";
                         }
@@ -395,30 +395,24 @@ namespace aac4
             }
 
             // Fills in the table.
-            foreach (var grammarRules in grammar)
+            foreach (var (term, rule) in grammar)
             {
-                foreach (var grammarRule in grammarRules.Value)
+                foreach (var grammarRule in rule)
                 {
-                    GrammarDict constructedFIRSTforProduction = new();
-                    List<string> listForCurrentGrammarRule = new()
-                    {
-                        grammarRule
-                    };
-                    constructedFIRSTforProduction = this.ConstructFIRST(grammar, listForCurrentGrammarRule, "test", constructedFIRSTforProduction);
+                    GrammarDict constructedFIRSTforProduction = this.ConstructFIRST(grammar, new() { grammarRule }, "test", new());
                     foreach (var terminal in constructedFIRSTforProduction["test"])
                     {
-                        if (terminal != "ε")
-                            for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
-                                if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals").Equals(grammarRules.Key))
-                                    predictiveAnalysisTable.Rows[i][terminal]
-                                        = grammarRule;
+                        if (terminal == "ε")
+                            continue;
+                        for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
+                            if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals") == term)
+                                predictiveAnalysisTable.Rows[i][terminal] = grammarRule;
                     }
                     if (constructedFIRSTforProduction["test"].Contains("ε"))
                         for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
-                            if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals").Equals(grammarRules.Key))
-                                foreach (var terminalFromFOLLOW in FOLLOW[grammarRules.Key])
-                                    predictiveAnalysisTable.Rows[i][terminalFromFOLLOW]
-                                        = grammarRule;
+                            if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals") == term)
+                                foreach (var terminalFromFOLLOW in FOLLOW[term])
+                                    predictiveAnalysisTable.Rows[i][terminalFromFOLLOW] = grammarRule;
                 }
             }
 
