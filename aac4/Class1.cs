@@ -16,8 +16,6 @@ namespace aac4
 
     public class DefaultDialogService
     {
-
-        public string FilePath { get; set; }
         public string BuildGrammarDictionary(string[] rules, out GrammarDict grammar)
         {
             grammar = new GrammarDict();
@@ -379,8 +377,7 @@ namespace aac4
                 {
                     nonterminal
                 };
-                for (int i = 1; i < headerRow.Count; i++)
-                    yetAnotherHeaderRow.Add("");
+                yetAnotherHeaderRow.AddRange(Enumerable.Repeat("", headerRow.Count - 1));
                 predictiveAnalysisTable.Rows.Add(yetAnotherHeaderRow.ToArray());
             }
 
@@ -410,7 +407,7 @@ namespace aac4
                     constructedFIRSTforProduction = this.ConstructFIRST(grammar, listForCurrentGrammarRule, "test", constructedFIRSTforProduction);
                     foreach (var terminal in constructedFIRSTforProduction["test"])
                     {
-                        if (!terminal.Equals("ε"))
+                        if (terminal != "ε")
                             for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
                                 if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals").Equals(grammarRules.Key))
                                     predictiveAnalysisTable.Rows[i][terminal]
@@ -452,7 +449,7 @@ namespace aac4
             changedStack.Add("$");
             List<string> terminalsFromTable = new();
             foreach (DataColumn terminal in predictiveAnalysisTable.Columns)
-                if (!terminal.ColumnName.Equals("Nonterminals"))
+                if (terminal.ColumnName != "Nonterminals")
                     terminalsFromTable.Add(terminal.ColumnName);
             List<string> nonterminalsFromTable = new();
             for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
@@ -538,8 +535,7 @@ namespace aac4
                                 {
                                     isCurrentValueInStackNonterminal = true;
 
-                                    string valueFromTable = (string)predictiveAnalysisTable.
-                                        Rows[i][$"\'{text.Substring(0, lastIndexOfTerminalInText)}\'"];
+                                    string valueFromTable = (string)predictiveAnalysisTable.Rows[i][$"\'{text.Substring(0, lastIndexOfTerminalInText)}\'"];
                                     if (!valueFromTable.Equals("") && valueFromTable != "Synch")
                                     {
                                         if (valueFromTable != "$")
@@ -645,24 +641,22 @@ namespace aac4
                             }
                         }
                     }
+                    else if (text == "$")
+                    {
+                        analysisResultsTable.Rows.Add(yetAnotherRow);
+                        PrintTableOrView(analysisResultsTable, "Result Table");
+                        break;
+                    }
                     else
                     {
-                        if (text == "$")
-                        {
-                            analysisResultsTable.Rows.Add(yetAnotherRow);
-                            PrintTableOrView(analysisResultsTable, "Result Table");
-                            break;
-                        }
-                        else
-                        {
-                            yetAnotherRow[2] = "Error, skip <<" + text + ">>";
+                        yetAnotherRow[2] = "Error, skip <<" + text + ">>";
 
-                            analysisResultsTable.Rows.Add(yetAnotherRow);
-                            PrintTableOrView(analysisResultsTable, "Result Table");
-                            errorMessages.Add(new KeyValuePair<int, string>(indexOfCharacterInInitialText, "Unexpected end of the text"));
-                            break;
-                        }
+                        analysisResultsTable.Rows.Add(yetAnotherRow);
+                        PrintTableOrView(analysisResultsTable, "Result Table");
+                        errorMessages.Add(new KeyValuePair<int, string>(indexOfCharacterInInitialText, "Unexpected end of the text"));
+                        break;
                     }
+
                 }
 
                 if (errorMessages.Count == 0)
