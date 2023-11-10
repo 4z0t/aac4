@@ -301,8 +301,7 @@ namespace aac4
                                 List<string> rangeToAdd = new(_first[beta].Where(x => x != "ε").Except(_follow[B]));
                                 if (rangeToAdd.Count != 0)
                                 {
-                                    _follow[B].AddRange(new List<string>(_first[beta].Where(x => x != "ε").
-                                    Except(_follow[B])));
+                                    _follow[B].AddRange(rangeToAdd);
                                     hasFOLLOWchanged = true;
                                 }
 
@@ -326,7 +325,7 @@ namespace aac4
                                 temporaryFIRST["beta"] = new List<string>(temporaryFIRST["beta"].Except(_follow[B]));
                                 if (temporaryFIRST["beta"].Count != 0)
                                 {
-                                    _follow[B].AddRange(temporaryFIRST["beta"].Except(_follow[B]));
+                                    _follow[B].AddRange(temporaryFIRST["beta"]);
                                     hasFOLLOWchanged = true;
                                 }
 
