@@ -460,12 +460,10 @@ namespace aac4
                         yetAnotherRow[0] = string.Join("", changedStack.ToArray().Select(x => x.ToString()).ToArray())
                             + currentValueInStack;
                         yetAnotherRow[1] = text;
-                        yetAnotherRow[2] = "";
                     }
-                    else
-                    {
-                        yetAnotherRow[2] = "";
-                    }
+
+                    yetAnotherRow[2] = "";
+
                     if (currentValueInStack != "$")
                     {
                         int lastIndexOfTerminalInText = -1;
@@ -494,12 +492,10 @@ namespace aac4
                                 Aggregate((max, cur) => max.Length > cur.Length ? max : cur).Count() - 3;
                         if (lastIndexOfTerminalInText == -1)
                         {
-                            yetAnotherRow[2] = "Error, remove " + currentValueInStack +
-                                " from the top of the stack and skip <<" + text[0] + ">>";
+                            yetAnotherRow[2] = $"Error, remove {currentValueInStack} from the top of the stack and skip <<{text[0]}>>";
                             analysisResultsTable.Rows.Add(yetAnotherRow);
 
-                            errorMessages.Add(new KeyValuePair<int, string>(indexOfCharacterInInitialText,
-                                "Invalid character '" + text[0] + "'"));
+                            errorMessages.Add(new(indexOfCharacterInInitialText, $"Invalid character '{text[0]}'"));
                             indexOfCharacterInInitialText += 1;
 
                             text = text.Remove(0, 1);
@@ -530,7 +526,7 @@ namespace aac4
                                     isCurrentValueInStackNonterminal = true;
 
                                     string valueFromTable = (string)predictiveAnalysisTable.Rows[i][$"\'{text.Substring(0, lastIndexOfTerminalInText)}\'"];
-                                    if (!valueFromTable.Equals("") && valueFromTable != "Synch")
+                                    if (valueFromTable != string.Empty && valueFromTable != "Synch")
                                     {
                                         if (valueFromTable != "$")
                                         {
@@ -573,11 +569,10 @@ namespace aac4
                                     {
                                         if (stack.Count < 3)
                                         {
-                                            yetAnotherRow[2] = "Error, skip <<" + text.Substring(0, lastIndexOfTerminalInText) + ">>";
+                                            yetAnotherRow[2] = $"Error, skip <<{text[..lastIndexOfTerminalInText]}>>";
                                             analysisResultsTable.Rows.Add(yetAnotherRow);
 
-                                            errorMessages.Add(new KeyValuePair<int, string>(indexOfCharacterInInitialText,
-                                                "Can't recognize the word! " + text.Substring(0, lastIndexOfTerminalInText) + "was skipped"));
+                                            errorMessages.Add(new(indexOfCharacterInInitialText, $"Can't recognize the word! {text[..lastIndexOfTerminalInText]} was skipped"));
                                             indexOfCharacterInInitialText += lastIndexOfTerminalInText;
 
                                             text = text.Remove(0, lastIndexOfTerminalInText);
@@ -585,25 +580,22 @@ namespace aac4
                                         }
                                         else
                                         {
-                                            yetAnotherRow[2] = "Error, PredictiveAnalysisTable[" + currentValueInStack + ", " +
-                                                text.Substring(0, lastIndexOfTerminalInText) + "] = Synch";
+                                            yetAnotherRow[2] = $"Error, PredictiveAnalysisTable[{currentValueInStack}, {text[..lastIndexOfTerminalInText]}] = Synch";
                                             analysisResultsTable.Rows.Add(yetAnotherRow);
 
                                             changedStack.RemoveAt(changedStack.Count - 1);
 
-                                            errorMessages.Add(new KeyValuePair<int, string>(indexOfCharacterInInitialText,
-                                                "Invalid characters '" + text.Substring(0, lastIndexOfTerminalInText) + "'"));
+                                            errorMessages.Add(new(indexOfCharacterInInitialText, $"Invalid characters '{text[..lastIndexOfTerminalInText]}'"));
                                         }
                                     }
                                     else if (string.Empty == valueFromTable)
                                     {
                                         if (text.Count() > 1)
                                         {
-                                            yetAnotherRow[2] = "Error, skip <<" + text.Substring(0, lastIndexOfTerminalInText) + ">>";
+                                            yetAnotherRow[2] = $"Error, skip <<{text[..lastIndexOfTerminalInText]}>>";
                                             analysisResultsTable.Rows.Add(yetAnotherRow);
 
-                                            errorMessages.Add(new KeyValuePair<int, string>(indexOfCharacterInInitialText,
-                                                "Can't recognize the word! " + text.Substring(0, lastIndexOfTerminalInText) + " was skipped"));
+                                            errorMessages.Add(new(indexOfCharacterInInitialText, $"Can't recognize the word! {text[..lastIndexOfTerminalInText]} was skipped"));
                                             indexOfCharacterInInitialText += lastIndexOfTerminalInText;
 
                                             text = text.Remove(0, lastIndexOfTerminalInText);
@@ -624,11 +616,10 @@ namespace aac4
                             }
                             if (!isCurrentValueInStackNonterminal)
                             {
-                                yetAnotherRow[2] = "Error, remove " + currentValueInStack + " from the top of the stack";
+                                yetAnotherRow[2] = $"Error, remove {currentValueInStack} from the top of the stack";
                                 analysisResultsTable.Rows.Add(yetAnotherRow);
 
-                                errorMessages.Add(new KeyValuePair<int, string>(indexOfCharacterInInitialText,
-                                                "Invalid character! " + currentValueInStack + " was expected"));
+                                errorMessages.Add(new(indexOfCharacterInInitialText, $"Invalid character! {currentValueInStack} was expected"));
                                 indexOfCharacterInInitialText += lastIndexOfTerminalInText;
 
                                 changedStack.RemoveAt(changedStack.Count - 1);
@@ -643,11 +634,11 @@ namespace aac4
                     }
                     else
                     {
-                        yetAnotherRow[2] = "Error, skip <<" + text + ">>";
+                        yetAnotherRow[2] = $"Error, skip <<{text}>>";
 
                         analysisResultsTable.Rows.Add(yetAnotherRow);
                         PrintTableOrView(analysisResultsTable, "Result Table");
-                        errorMessages.Add(new KeyValuePair<int, string>(indexOfCharacterInInitialText, "Unexpected end of the text"));
+                        errorMessages.Add(new (indexOfCharacterInInitialText, "Unexpected end of the text"));
                         break;
                     }
 
