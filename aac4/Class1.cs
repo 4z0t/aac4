@@ -505,7 +505,7 @@ namespace aac4
                         {
                             lastIndexOfTerminalInText++;
                         }
-                        if (currentValueInStack == $"\'{text.Substring(0, lastIndexOfTerminalInText)}\'")
+                        if (currentValueInStack == $"\'{text[..lastIndexOfTerminalInText]}\'")
                         {
                             text = text.Remove(0, lastIndexOfTerminalInText);
                             analysisResultsTable.Rows.Add(infoRow);
