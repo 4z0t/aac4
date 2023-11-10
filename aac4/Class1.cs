@@ -397,22 +397,22 @@ namespace aac4
             // Fills in the table.
             foreach (var (term, rule) in grammar)
             {
-                foreach (var grammarRule in rule)
+                foreach (string grammarRule in rule)
                 {
                     GrammarDict constructedFIRSTforProduction = this.ConstructFIRST(grammar, new() { grammarRule }, "test", new());
                     foreach (var terminal in constructedFIRSTforProduction["test"])
                     {
                         if (terminal == "ε")
                             continue;
-                        for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
-                            if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals") == term)
-                                predictiveAnalysisTable.Rows[i][terminal] = grammarRule;
+                        foreach (DataRow row in predictiveAnalysisTable.Rows)
+                            if (row.Field<string>("Nonterminals") == term)
+                                row[terminal] = grammarRule;
                     }
                     if (constructedFIRSTforProduction["test"].Contains("ε"))
-                        for (int i = 0; i < predictiveAnalysisTable.Rows.Count; i++)
-                            if (predictiveAnalysisTable.Rows[i].Field<string>("Nonterminals") == term)
+                        foreach (DataRow row in predictiveAnalysisTable.Rows)
+                            if (row.Field<string>("Nonterminals") == term)
                                 foreach (var terminalFromFOLLOW in FOLLOW[term])
-                                    predictiveAnalysisTable.Rows[i][terminalFromFOLLOW] = grammarRule;
+                                    row[terminalFromFOLLOW] = grammarRule;
                 }
             }
 
