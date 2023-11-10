@@ -35,7 +35,9 @@ namespace aac4
 
                 Console.WriteLine("------------FIRST------------");
 
-                FOLLOW = dialogService.ConstructFOLLOW(FIRST, startNonterminal, grammar);
+                //FOLLOW = dialogService.ConstructFOLLOW(FIRST, startNonterminal, grammar);
+                g.ConstructFOLLOW();
+                FOLLOW = g.Follow;
 
                 Console.WriteLine("------------FOLLOW------------");
 
