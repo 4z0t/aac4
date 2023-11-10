@@ -18,6 +18,8 @@ namespace aac4
         }
 
         public Rules Rules { get { return _rules; } }
+
+        public Rules First { get => _first; }
         public string StartNonTerm { get { return _startNonTerm; } }
 
         private static Regex ruleRegex = new(@"(<.*?>):\s(.*)");
@@ -164,9 +166,96 @@ namespace aac4
                 _first = ContinueFIRST(_first, currentNonterminal, grammarRules);
         }
 
+
+        public static void Seek(string s, ref StringBuilder sb, char start, char end, ref int i)
+        {
+            sb.Append(start);
+            while (s[++i] != end)
+                sb.Append(s[i]);
+            sb.Append(end);
+        }
+
         private Rules ContinueFIRST(Rules oldFirst, string currentNonterminal, List<string> grammarRules)
         {
             Rules newFirst = new(oldFirst);
+
+            List<string> terminals = new();
+            StringBuilder currentSentence = new();
+            bool isItFirstTime = true;
+            bool doAllPreviousFIRSTsHaveEmptySymbol = false;
+            foreach (var grammarRule in grammarRules)
+            {
+                for (int i = 0; i < grammarRule.Length; i++)
+                {
+                    switch (grammarRule[i])
+                    {
+                        case '<':
+                            Seek(grammarRule, ref currentSentence, '<', '>', ref i);
+                            break;
+                        case '\'':
+                            Seek(grammarRule, ref currentSentence, '\'', '\'', ref i);
+                            break;
+                        case '$':
+                            currentSentence.Append("ε");
+                            break;
+                    }
+                    string nonTerm = currentSentence.ToString();
+
+                    if (_rules.ContainsKey(nonTerm) && isItFirstTime)
+                    {
+                        newFirst = this.ContinueFIRST(newFirst, nonTerm, _rules[nonTerm]);
+                        if (newFirst[nonTerm].Contains("ε"))
+                        {
+                            doAllPreviousFIRSTsHaveEmptySymbol = true;
+                            newFirst[nonTerm].Remove("ε");
+                        }
+                        terminals.AddRange(newFirst[nonTerm].Except(terminals));
+                    }
+                    else if (_rules.ContainsKey(nonTerm) && !isItFirstTime)
+                    {
+                        if (doAllPreviousFIRSTsHaveEmptySymbol)
+                        {
+                            newFirst = this.ContinueFIRST(newFirst, nonTerm, _rules[nonTerm]);
+                            if (!newFirst[nonTerm].Contains("ε") &&
+                                doAllPreviousFIRSTsHaveEmptySymbol)
+                            {
+                                doAllPreviousFIRSTsHaveEmptySymbol = false;
+                            }
+                            else if (newFirst[nonTerm].Contains("ε") &&
+                                !doAllPreviousFIRSTsHaveEmptySymbol)
+                            {
+                                newFirst[nonTerm].Remove("ε");
+                            }
+                            terminals.AddRange(newFirst[nonTerm].Except(terminals));
+                        }
+                    }
+                    else
+                    {
+                        if (nonTerm == "ε")
+                        {
+                            doAllPreviousFIRSTsHaveEmptySymbol = true;
+                        }
+                        else
+                        {
+                            if (!terminals.Contains(nonTerm))
+                                terminals.Add(nonTerm);
+                            currentSentence.Clear();
+                        }
+                        break;
+                    }
+                    currentSentence.Clear();
+                    isItFirstTime = false;
+                }
+                if (doAllPreviousFIRSTsHaveEmptySymbol)
+                {
+                    terminals.Add("ε");
+                }
+                currentSentence.Clear();
+                doAllPreviousFIRSTsHaveEmptySymbol = false;
+            }
+
+            if (!newFirst.ContainsKey(currentNonterminal))
+                newFirst.Add(currentNonterminal, terminals);
 
             return newFirst;
         }

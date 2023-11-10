@@ -28,13 +28,20 @@ namespace aac4
                 startNonterminal = g.StartNonTerm;
                 var grammar = g.Rules;
 
-                FIRST = new Dictionary<string, List<string>>();
-                foreach (var grammarRules in grammar)
-                    FIRST = dialogService.ConstructFIRST(grammar, grammarRules.Value, grammarRules.Key, FIRST);
+                Console.WriteLine("------------File red------------");
+
+                g.ConstructFIRST();
+                FIRST = g.First;
+
+                Console.WriteLine("------------FIRST------------");
 
                 FOLLOW = dialogService.ConstructFOLLOW(FIRST, startNonterminal, grammar);
 
+                Console.WriteLine("------------FOLLOW------------");
+
                 DataTable predictiveAnalysisTable = dialogService.GeneratePredictiveAnalysisTable(grammar, FIRST, FOLLOW);
+
+                Console.WriteLine("------------PAT------------");
 
                 string Sentence = File.ReadAllText(targetFilePath);
                 string[] textRows = Sentence.Replace("\r\n", "\n").Split('\n');
