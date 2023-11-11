@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Diagnostics;
 
 namespace aac4
 {
@@ -28,22 +29,22 @@ namespace aac4
                 startNonterminal = g.StartNonTerm;
                 var grammar = g.Rules;
 
-                Console.WriteLine("------------File red------------");
+                Debug.WriteLine("------------File red------------");
 
                 g.ConstructFIRST();
                 FIRST = g.First;
 
-                Console.WriteLine("------------FIRST------------");
+                Debug.WriteLine("------------FIRST------------");
 
                 //FOLLOW = dialogService.ConstructFOLLOW(FIRST, startNonterminal, grammar);
                 g.ConstructFOLLOW();
                 FOLLOW = g.Follow;
 
-                Console.WriteLine("------------FOLLOW------------");
+                Debug.WriteLine("------------FOLLOW------------");
 
                 DataTable predictiveAnalysisTable = dialogService.GeneratePredictiveAnalysisTable(grammar, FIRST, FOLLOW);
 
-                Console.WriteLine("------------PAT------------");
+                Debug.WriteLine("------------PAT------------");
 
                 string Sentence = File.ReadAllText(targetFilePath);
                 string[] textRows = Sentence.Replace("\r\n", "\n").Split('\n');
