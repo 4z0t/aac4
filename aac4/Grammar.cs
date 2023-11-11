@@ -183,19 +183,19 @@ namespace aac4
 
             List<string> terminals = new();
             StringBuilder currentSentence = new();
-            bool isItFirstTime = true;
-            bool doAllPreviousFIRSTsHaveEmptySymbol = false;
-            foreach (var grammarRule in grammarRules)
+            bool isFirst = true;
+            bool allPrevHaveEmptySymbol = false;
+            foreach (var rule in grammarRules)
             {
-                for (int i = 0; i < grammarRule.Length; i++)
+                for (int i = 0; i < rule.Length; i++)
                 {
-                    switch (grammarRule[i])
+                    switch (rule[i])
                     {
                         case '<':
-                            Seek(grammarRule, ref currentSentence, '<', '>', ref i);
+                            Seek(rule, ref currentSentence, '<', '>', ref i);
                             break;
                         case '\'':
-                            Seek(grammarRule, ref currentSentence, '\'', '\'', ref i);
+                            Seek(rule, ref currentSentence, '\'', '\'', ref i);
                             break;
                         case '$':
                             currentSentence.Append("ε");
@@ -203,28 +203,28 @@ namespace aac4
                     }
                     string nonTerm = currentSentence.ToString();
 
-                    if (_rules.ContainsKey(nonTerm) && isItFirstTime)
+                    if (_rules.ContainsKey(nonTerm) && isFirst)
                     {
                         newFirst = this.ContinueFIRST(newFirst, nonTerm, _rules[nonTerm]);
                         if (newFirst[nonTerm].Contains("ε"))
                         {
-                            doAllPreviousFIRSTsHaveEmptySymbol = true;
+                            allPrevHaveEmptySymbol = true;
                             newFirst[nonTerm].Remove("ε");
                         }
                         terminals.AddRange(newFirst[nonTerm].Except(terminals));
                     }
-                    else if (_rules.ContainsKey(nonTerm) && !isItFirstTime)
+                    else if (_rules.ContainsKey(nonTerm) && !isFirst)
                     {
-                        if (doAllPreviousFIRSTsHaveEmptySymbol)
+                        if (allPrevHaveEmptySymbol)
                         {
                             newFirst = this.ContinueFIRST(newFirst, nonTerm, _rules[nonTerm]);
                             if (!newFirst[nonTerm].Contains("ε") &&
-                                doAllPreviousFIRSTsHaveEmptySymbol)
+                                allPrevHaveEmptySymbol)
                             {
-                                doAllPreviousFIRSTsHaveEmptySymbol = false;
+                                allPrevHaveEmptySymbol = false;
                             }
                             else if (newFirst[nonTerm].Contains("ε") &&
-                                !doAllPreviousFIRSTsHaveEmptySymbol)
+                                !allPrevHaveEmptySymbol)
                             {
                                 newFirst[nonTerm].Remove("ε");
                             }
@@ -235,7 +235,7 @@ namespace aac4
                     {
                         if (nonTerm == "ε")
                         {
-                            doAllPreviousFIRSTsHaveEmptySymbol = true;
+                            allPrevHaveEmptySymbol = true;
                         }
                         else
                         {
@@ -246,14 +246,14 @@ namespace aac4
                         break;
                     }
                     currentSentence.Clear();
-                    isItFirstTime = false;
+                    isFirst = false;
                 }
-                if (doAllPreviousFIRSTsHaveEmptySymbol)
+                if (allPrevHaveEmptySymbol)
                 {
                     terminals.Add("ε");
                 }
                 currentSentence.Clear();
-                doAllPreviousFIRSTsHaveEmptySymbol = false;
+                allPrevHaveEmptySymbol = false;
             }
 
             if (!newFirst.ContainsKey(currentNonterminal))
@@ -277,9 +277,9 @@ namespace aac4
                 hasChanged = false;
                 foreach (var grammarRules in _rules)
                 {
-                    foreach (string grammarRuleForeach in grammarRules.Value)
+                    foreach (string rule in grammarRules.Value)
                     {
-                        string grammarRule = grammarRuleForeach;
+                        string grammarRule = rule;
                         Match match;
                         while (true)
                         {
@@ -291,7 +291,7 @@ namespace aac4
 
                             string B = match.Groups[1].Value;
 
-                            string beta = grammarRuleForeach.Remove(0, grammarRuleForeach.IndexOf(B) + B.Length);
+                            string beta = rule.Remove(0, rule.IndexOf(B) + B.Length);
                             if (_first.ContainsKey(beta))
                             {
                                 List<string> rangeToAdd = new(_first[beta].Where(x => x != "ε").Except(_follow[B]));
