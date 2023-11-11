@@ -271,18 +271,14 @@ namespace aac4
             if (!_follow[_startNonTerm].Contains("$"))
                 _follow[_startNonTerm].Add("'$'");
 
-            // Если имеется продукция A-> aBb, то все элементы множества FIRST(b), кроме ε, помещаются в множество FOLLOW(B).
-            // Если имеется продукция A-> aB или A-> aBb, где FIRST(b) содержит ε (т.е. b => ε), то все элементы из множества FOLLOW(A) 
-            // помещаются в множество FOLLOW(B).
-            bool hasFOLLOWchanged = true;
-            while (hasFOLLOWchanged)
+            bool hasChanged = true;
+            while (hasChanged)
             {
-                hasFOLLOWchanged = false;
+                hasChanged = false;
                 foreach (var grammarRules in _rules)
                 {
                     foreach (string grammarRuleForeach in grammarRules.Value)
                     {
-                        // Сдвиг окна aBb в паттерне A-> aBb.
                         string grammarRule = grammarRuleForeach;
                         Match match;
                         while (true)
@@ -302,7 +298,7 @@ namespace aac4
                                 if (rangeToAdd.Count != 0)
                                 {
                                     _follow[B].AddRange(rangeToAdd);
-                                    hasFOLLOWchanged = true;
+                                    hasChanged = true;
                                 }
 
                                 if (_first[beta].Contains("ε"))
@@ -311,31 +307,31 @@ namespace aac4
                                     if (rangeToAdd.Count != 0)
                                     {
                                         _follow[B].AddRange(rangeToAdd);
-                                        hasFOLLOWchanged = true;
+                                        hasChanged = true;
                                     }
                                 }
                             }
                             else
                             {
-                                bool doesTemporaryFirstContainEpsilon = false;
 
                                 var temporaryFIRST = ContinueFIRST(new(), "beta", new List<string> { beta });
-                                if (temporaryFIRST["beta"].Contains("ε"))
-                                    doesTemporaryFirstContainEpsilon = true;
+
+                                bool containsEps = temporaryFIRST["beta"].Contains("ε");
+
                                 temporaryFIRST["beta"] = new List<string>(temporaryFIRST["beta"].Except(_follow[B]));
                                 if (temporaryFIRST["beta"].Count != 0)
                                 {
                                     _follow[B].AddRange(temporaryFIRST["beta"]);
-                                    hasFOLLOWchanged = true;
+                                    hasChanged = true;
                                 }
 
-                                if (doesTemporaryFirstContainEpsilon)
+                                if (containsEps)
                                 {
                                     List<string> rangeToAdd = new List<string>(_follow[grammarRules.Key].Except(_follow[B]));
                                     if (rangeToAdd.Count != 0)
                                     {
                                         _follow[B].AddRange(rangeToAdd);
-                                        hasFOLLOWchanged = true;
+                                        hasChanged = true;
                                     }
                                 }
                             }
@@ -350,7 +346,7 @@ namespace aac4
                             if (rangeToAdd.Count != 0)
                             {
                                 _follow[B].AddRange(rangeToAdd);
-                                hasFOLLOWchanged = true;
+                                hasChanged = true;
                             }
                         }
                     }
