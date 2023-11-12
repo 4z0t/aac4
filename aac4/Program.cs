@@ -47,12 +47,25 @@ namespace aac4
                 Debug.WriteLine("------------PAT------------");
 
                 string Sentence = File.ReadAllText(targetFilePath);
-                string[] textRows = Sentence.Replace("\r\n", "\n").Split('\n');
-                int[] numberOfCharactersInEachRow = new int[textRows.Length];
-                for (int i = 0; i < textRows.Length; i++)
-                    numberOfCharactersInEachRow[i] = textRows[i].Length;
-                dialogService.TextCorrectnessVerification(predictiveAnalysisTable, FIRST, FOLLOW,
-                    startNonterminal, Sentence, numberOfCharactersInEachRow);
+
+                ErrorCorrector errorCorrector = new(predictiveAnalysisTable);
+                var res = errorCorrector.CheckText(startNonterminal, Sentence);
+                if (res.errors != null)
+                {
+                    if (res.result != null)
+                    {
+                        Utility.PrintTableOrView(res.result, "Result Table");
+                    }
+                    Console.WriteLine("Error(s) found");
+                    Utility.PrintTableOrView(res.errors, "Table Of Errors");
+                }
+                else if (res.result != null)
+                {
+                    Utility.PrintTableOrView(res.result, "Result Table");
+                    Console.WriteLine("Errors not found");
+                }
+
+
             }
         }
     }
