@@ -42,7 +42,7 @@ namespace aac4
 
                 Debug.WriteLine("------------FOLLOW------------");
 
-                DataTable predictiveAnalysisTable = dialogService.GeneratePredictiveAnalysisTable(grammar, FIRST, FOLLOW);
+                DataTable predictiveAnalysisTable = g.MakePredictiveAnalysisTable();
 
                 Debug.WriteLine("------------PAT------------");
 

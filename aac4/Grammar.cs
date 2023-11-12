@@ -357,6 +357,81 @@ namespace aac4
         public DataTable MakePredictiveAnalysisTable()
         {
             DataTable predictiveAnalysisTable = new();
+            List<string> headerRow = new()
+            {
+                "Nonterminals"
+            };
+
+            // Generates an empty table with terminals in the header row and nonterminals in the header column.
+            List<string> headerColumn = new();
+            {
+                StringBuilder buffer = new();
+                foreach (var (term, rule) in _rules)
+                {
+                    headerColumn.Add(term);
+                    foreach (var grammarRule in rule)
+                    {
+                        for (int i = 0; i < grammarRule.Length; i++)
+                        {
+                            if (grammarRule[i] == '\'')
+                            {
+                                Seek(grammarRule, ref buffer, '\'', '\'', ref i);
+                                var s = buffer.ToString();
+                                if (!headerRow.Contains(s))
+                                    headerRow.Add(s);
+                                buffer.Clear();
+                            }
+                            else if (grammarRule[i] == '$' && !headerRow.Contains("'$'"))
+                                headerRow.Add("'$'");
+                        }
+                    }
+                }
+            }
+            predictiveAnalysisTable.Columns.AddRange(headerRow.Select(r => new DataColumn(r)).ToArray());
+            foreach (var nonterminal in headerColumn)
+            {
+                List<string> yetAnotherHeaderRow = new()
+                {
+                    nonterminal
+                };
+                yetAnotherHeaderRow.AddRange(Enumerable.Repeat("", headerRow.Count - 1));
+                predictiveAnalysisTable.Rows.Add(yetAnotherHeaderRow.ToArray());
+            }
+
+            // Adds synch symbols.
+            foreach (var (term, _) in _rules)
+            {
+                foreach (DataRow row in predictiveAnalysisTable.Rows)
+                    if (row.Field<string>("Nonterminals") == term)
+                    {
+                        foreach (var elementFromFOLLOW in _follow[term])
+                        {
+                            row[elementFromFOLLOW] = "Synch";
+                        }
+                    }
+            }
+
+            // Fills in the table.
+            foreach (var (term, rule) in _rules)
+            {
+                foreach (string grammarRule in rule)
+                {
+                    var constructedFIRSTforProduction = ContinueFIRST(new(), "test", new() { grammarRule });
+                    foreach (var terminal in constructedFIRSTforProduction["test"])
+                    {
+                        if (terminal == "ε")
+                            continue;
+                        foreach (DataRow row in predictiveAnalysisTable.Rows)
+                            if (row.Field<string>("Nonterminals") == term)
+                                row[terminal] = grammarRule;
+                    }
+                    if (constructedFIRSTforProduction["test"].Contains("ε"))
+                        foreach (DataRow row in predictiveAnalysisTable.Rows)
+                            if (row.Field<string>("Nonterminals") == term)
+                                foreach (var terminalFromFOLLOW in _follow[term])
+                                    row[terminalFromFOLLOW] = grammarRule;
+                }
+            }
 
             return predictiveAnalysisTable;
         }

@@ -443,8 +443,12 @@ namespace aac4
             changedStack.Add("$");
             List<string> terminalsFromTable = new();
             foreach (DataColumn terminal in predictiveAnalysisTable.Columns)
+            {
                 if (terminal.ColumnName != "Nonterminals")
+                {
                     terminalsFromTable.Add(terminal.ColumnName);
+                }
+            }
 
             try
             {
@@ -667,10 +671,9 @@ namespace aac4
                                 endIndexOfCurrentLine = quantityOfSymbolsInEachLine[0];
                                 break;
                             }
-                            else
+                            else if (i + 1 < quantityOfSymbolsInEachLine.Length)
                             {
-                                if (i + 1 < quantityOfSymbolsInEachLine.Length)
-                                    endIndexOfCurrentLine += quantityOfSymbolsInEachLine[i + 1] + 1;
+                                endIndexOfCurrentLine += quantityOfSymbolsInEachLine[i + 1] + 1;
                             }
                         }
                     }
