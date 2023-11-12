@@ -114,7 +114,6 @@ namespace aac4
                             changedStack.RemoveAt(changedStack.Count - 1);
 
                             continue;
-                            //throw new ArgumentException("Error in the text (3)");
                         }
                         else
                         {
@@ -258,7 +257,6 @@ namespace aac4
 
                 if (errorMessages.Count == 0)
                 {
-                    //Console.WriteLine("Error(s) not found!\nCongratulations!");
                     return new()
                     {
                         result = analysisResultsTable,
@@ -267,8 +265,6 @@ namespace aac4
                 }
                 else
                 {
-                    //Console.WriteLine("Error(s) found!");
-
                     var orderedErrorList = errorMessages.OrderBy(x => x.Key).ToList();
                     DataTable errorTable = new();
                     string[] errorTableRow = { "Line", "Column", "Error Description" };
@@ -299,7 +295,6 @@ namespace aac4
                         result = analysisResultsTable,
                         errors = errorTable
                     };
-                    //Utility.PrintTableOrView(errorTable, "Table Of Errors");
                 }
             }
             catch (Exception ex)
