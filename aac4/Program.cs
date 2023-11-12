@@ -48,9 +48,9 @@ namespace aac4
 
                 string Sentence = File.ReadAllText(targetFilePath);
                 string[] textRows = Sentence.Replace("\r\n", "\n").Split('\n');
-                int[] numberOfCharactersInEachRow = new int[textRows.Count()];
-                for (int i = 0; i < textRows.Count(); i++)
-                    numberOfCharactersInEachRow[i] = textRows[i].Count();
+                int[] numberOfCharactersInEachRow = new int[textRows.Length];
+                for (int i = 0; i < textRows.Length; i++)
+                    numberOfCharactersInEachRow[i] = textRows[i].Length;
                 dialogService.TextCorrectnessVerification(predictiveAnalysisTable, FIRST, FOLLOW,
                     startNonterminal, Sentence, numberOfCharactersInEachRow);
             }

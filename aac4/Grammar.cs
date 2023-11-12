@@ -3,12 +3,13 @@ using System.Data;
 using System.Text;
 using System.Text.RegularExpressions;
 
+
 namespace aac4
 {
     using Rules = Dictionary<string, List<string>>;
+
     class Grammar
     {
-
         public Grammar(string[] rules)
         {
             _rules = new();
@@ -168,15 +169,6 @@ namespace aac4
                 _first = ContinueFIRST(_first, currentNonterminal, grammarRules);
         }
 
-
-        public static void Seek(string s, ref StringBuilder sb, char start, char end, ref int i)
-        {
-            sb.Append(start);
-            while (s[++i] != end)
-                sb.Append(s[i]);
-            sb.Append(end);
-        }
-
         private Rules ContinueFIRST(Rules oldFirst, string currentNonterminal, List<string> grammarRules)
         {
             Rules newFirst = new(oldFirst);
@@ -192,10 +184,10 @@ namespace aac4
                     switch (rule[i])
                     {
                         case '<':
-                            Seek(rule, ref currentSentence, '<', '>', ref i);
+                            Utility.Seek(rule, ref currentSentence, '<', '>', ref i);
                             break;
                         case '\'':
-                            Seek(rule, ref currentSentence, '\'', '\'', ref i);
+                            Utility.Seek(rule, ref currentSentence, '\'', '\'', ref i);
                             break;
                         case '$':
                             currentSentence.Append("ε");
@@ -354,6 +346,7 @@ namespace aac4
             }
         }
 
+
         public DataTable MakePredictiveAnalysisTable()
         {
             DataTable predictiveAnalysisTable = new();
@@ -375,7 +368,7 @@ namespace aac4
                         {
                             if (grammarRule[i] == '\'')
                             {
-                                Seek(grammarRule, ref buffer, '\'', '\'', ref i);
+                                Utility.Seek(grammarRule, ref buffer, '\'', '\'', ref i);
                                 var s = buffer.ToString();
                                 if (!headerRow.Contains(s))
                                     headerRow.Add(s);
