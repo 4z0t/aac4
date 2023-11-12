@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace aac4
 {
+    public class BrokenFileException : Exception
+    {
+        public BrokenFileException() : base("The file is broken!") { }
+    }
     internal class Utility
     {
         public static void Seek(string s, ref StringBuilder sb, char start, char end, ref int i)
