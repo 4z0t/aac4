@@ -1,6 +1,12 @@
-﻿int main ( ) {
-for( int i = 0 ; 1 < a ; )
+﻿int main ( )
 {
-int aiugY = 3 ;
+for ( int i = 0 ; 1 < a ;)
+{
+{
+if(3 >= a)
+{
+int a = 3;
+}
+}
 }
 }

@@ -7,13 +7,20 @@ namespace aac4
     {
         static void Main(string[] args)
         {
+            string grammarFilePath;
+            string targetFilePath;
             if (args.Length != 2)
             {
-                Console.Error.WriteLine("Expected 2 arguments");
-                return;
+                //Console.Error.WriteLine("Expected 2 arguments");
+                //return;
+                grammarFilePath = "D:\\Git\\aac4/aac4/Cgrammar.txt";
+                targetFilePath = "D:\\Git\\aac4/aac4/example2.txt";
             }
-            string grammarFilePath = args[0];
-            string targetFilePath = args[1];
+            else
+            {
+                grammarFilePath = args[0];
+                targetFilePath = args[1];
+            }
 
             string[] machineFromTXT = File.ReadAllLines(grammarFilePath);
             if (machineFromTXT.Length != 0)

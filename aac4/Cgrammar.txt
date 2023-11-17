@@ -6,7 +6,7 @@
 	| <declaration>';'
 	| '{' <statement> '}'
 	| <for> <statement>
-	| <if> <statement>
+	| <if> <statement><else>
 	| <return>
 <declaration>: <type> <identifier> <assign>
 <identifier>: <character><id_end>
@@ -24,6 +24,8 @@
 <for>: 'for' '(' <declaration> ';' <bool_expression> ';'')'
 <bool_expression>: <identifier> <relop> <identifier>
 	| <number> <relop> <identifier>
-<relop>: '<' | '>' | '==' | '!='
+<relop>: '<' | '>' | '==' | '!=' | '>='
 <if>: 'if''('<bool_expression>')'
 <return>: 'return' <number>';'
+<else>: 
+	| ' else' <statement>
